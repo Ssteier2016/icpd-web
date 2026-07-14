@@ -1563,27 +1563,19 @@ ul {
 }
 
 @media (max-width: 768px) {
-  .sermons-grid, .songs-grid, .eb-videos-grid, .library-grid {
+  .songs-grid, .eb-videos-grid, .library-grid {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 10px !important;
   }
-  .sermon-card .sermon-content, .song-card .song-info {
+  .song-card .song-info {
     padding: 8px !important;
   }
-  .sermon-card h3, .song-card h3 {
+  .song-card h3 {
     font-size: 0.7rem !important;
     margin-bottom: 5px !important;
   }
-  .sermon-card p, .song-card p {
+  .song-card p {
     font-size: 0.6rem !important;
-  }
-  .sermon-actions {
-    grid-template-columns: 1fr !important;
-    gap: 4px !important;
-  }
-  .sermon-actions .btn {
-    font-size: 0.6rem !important;
-    padding: 4px !important;
   }
   .play-btn {
     width: 35px !important;
