@@ -650,7 +650,7 @@ function initMap() {
   }).addTo(map);
 
   const churchIcon = L.icon({
-    iconUrl: 'https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=BvgXSpKzjVMQ7kNvwHqZtNq&_nc_oc=AdpOUup00-RZcedC699CGJVlLh8ZDA4V4XrDAkJfj0fI2fSPDwDgoUSJqulxqyJg-e4aOqOXZ5wEK6hHPMJEJ7X4&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=-NRYiOXh38OOY8QD72RJbA&_nc_ss=782a8&oh=00_AQBcT5pNpARtWDSgupB9WzovqyKCQ-U5kgoVnOaL-p4tZg&oe=6A543117',
+    iconUrl: 'https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157',
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40]

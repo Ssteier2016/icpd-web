@@ -1,4 +1,4 @@
-const CACHE_NAME = 'icpd-cache-v2';
+const CACHE_NAME = 'icpd-cache-v3';
 const ASSETS = [
   './',
   './index.html',
