@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICPD - Iglesia Cristiana Pueblo de Dios</title>
+  <meta name="description" content="Sitio oficial de la Iglesia Cristiana Pueblo de Dios en San Justo. Sermones, actividades, escuela bíblica y más.">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1f2937">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+  </script>
+  <!-- Firebase SDK (Compat Version para Vanilla JS sin módulos) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0b0f17">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo-link" style="display: flex; align-items: center; gap: 15px; text-decoration: none;">
+        <img class="nav-logo" id="nav-logo-img" src="https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157" alt="ICPD Logo" style="width: 58px; height: 58px; object-fit: cover; border-radius: 50%; border: 1px solid var(--color-gold);">
+        <span class="logo-text" style="font-size: 1.6rem; margin: 0; align-self: center;">ICPD</span>
+      </a>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="#inicio" class="nav-item active"><i class="fa-solid fa-house"></i> Inicio</a></li>
+        <li><a href="#sermones" class="nav-item"><i class="fa-solid fa-book-open"></i> Sermones</a></li>
+        <li><a href="#canciones" class="nav-item"><i class="fa-solid fa-music"></i> Canciones</a></li>
+        <li><a href="#biblioteca" class="nav-item"><i class="fa-solid fa-book"></i> Biblioteca</a></li>
+        <li><a href="#escuela-biblica" class="nav-item"><i class="fa-solid fa-graduation-cap"></i> Escuela Bíblica</a></li>
+        <li><a href="#actividades" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Agenda</a></li>
+        <li><a href="#historia" class="nav-item"><i class="fa-solid fa-church"></i> Historia</a></li>
+        <li><a href="#contacto" class="nav-item"><i class="fa-solid fa-envelope"></i> Contacto</a></li>
+      </ul>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Areas -->
+  <main>
+    
+    <!-- Hero Section -->
+    <section id="inicio" class="hero-section">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <img class="hero-logo animate-fade-in" id="hero-logo-img" src="https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157" alt="Iglesia Logo">
+        <h1 class="animate-slide-up" id="hero-title">Iglesia Cristiana Pueblo de Dios</h1>
+        <p class="hero-subtitle animate-slide-up" id="hero-subtitle">Un lugar de encuentro con Dios y comunidad en San Justo</p>
+        <div class="hero-buttons animate-fade-in" id="hero-buttons-container">
+          <!-- Dynamically filled by app.js -->
+        </div>
+        
+        <!-- Frases Rotativas (Cada 4 hs) -->
+        <div id="hero-frases-container" class="animate-fade-in">
+          <!-- Dynamically filled by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Sermons Section -->
+    <section id="sermones" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <h2>Historial de Sermones</h2>
+          <p>Explora, escucha, lee y mira las prédicas ordenadas por fecha</p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="sermon-search" placeholder="Buscar por título, pasaje o predicador...">
+          </div>
+          <div class="date-filter">
+            <label for="sermon-date">Filtrar por fecha:</label>
+            <input type="date" id="sermon-date">
+            <button id="clear-date-btn" class="btn btn-sm btn-icon" title="Limpiar fecha"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- Sermons Grid -->
+        <div class="sermons-grid" id="sermones-grid">
+          <!-- Dynamically filled by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Songs Section -->
+    <section id="canciones" class="section-padding alt-bg">
+      <div class="container">
+        <div class="section-header">
+          <h2>Canciones y Alabanzas</h2>
+          <p>Videos de las canciones que cantamos y exaltamos en nuestras reuniones</p>
+        </div>
+        <div class="search-container" style="margin-bottom: 25px; text-align: center;">
+          <input type="text" id="songs-search-input" placeholder="Buscar canción por título..." style="width: 100%; max-width: 400px; padding: 12px 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg-card); color: #fff; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--color-gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        <div class="songs-grid" id="songs-grid">
+          <!-- Dynamically filled by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Library Section -->
+    <section id="biblioteca" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <h2>Biblioteca</h2>
+          <p>Encuentra libros recomendados para fortalecer tu fe y conocimiento bíblico</p>
+        </div>
+        <div class="library-grid" id="library-grid">
+          <!-- Dynamically filled by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Bible School Section -->
+    <section id="escuela-biblica" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <h2>Escuela Bíblica</h2>
+          <p>Material exclusivo gratuito de estudio, discipulado y lecciones en video</p>
+        </div>
+        
+        <div class="eb-videos">
+          <h3 style="color: var(--color-gold); margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;"><i class="fa-solid fa-photo-film"></i> Clases y Enseñanzas</h3>
+          <div class="eb-videos-grid" id="eb-videos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px;">
+            <!-- Dynamically filled by app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Activities / Agenda Section -->
+    <section id="actividades" class="section-padding alt-bg">
+      <div class="container">
+        <div class="section-header">
+          <h2>Agenda y Actividades</h2>
+          <p>Entérate de nuestras reuniones semanales y eventos especiales</p>
+        </div>
+        <div class="agenda-container" id="agenda-container">
+          <!-- Dynamically filled by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- History / Gallery Section -->
+    <section id="historia" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <h2>Nuestra Historia</h2>
+          <p>Conoce más de la Iglesia Cristiana Pueblo de Dios en San Justo</p>
+        </div>
+        <div class="history-content">
+          <div class="history-text">
+            <p>La <strong>Iglesia Cristiana Pueblo de Dios (ICPD)</strong> es una comunidad de creyentes en Jesucristo, ubicada en el corazón de San Justo, Buenos Aires, Argentina. Bajo el liderazgo y guía pastoral de <strong>Sergio Hamdan</strong>, nuestra misión se centra en la exposición fiel y reverente de la Palabra de Dios, el discipulado sistemático y la proclamación del Evangelio.</p>
+            <p>Nuestra visión es formar discípulos que amen a Dios con todo su corazón y a su prójimo como a sí mismos, equipándolos a través del estudio bíblico inductivo, la oración y la comunión fraternal. Nos congregamos cada domingo en nuestro salón para adorar juntos a nuestro Salvador.</p>
+            <blockquote>
+              <i class="fa-solid fa-quote-left"></i>
+              "Y perseveraban en la doctrina de los apóstoles, en la comunión unos con otros, en el partimiento del pan y en las oraciones." - Hechos 2:42
+            </blockquote>
+          </div>
+          <div class="history-gallery">
+            <h3>Galería de Fotos de la Iglesia</h3>
+            <div class="gallery-grid" id="gallery-grid">
+              <!-- Dynamically filled by app.js from localStorage -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Location & Contact Section -->
+    <section id="contacto" class="section-padding alt-bg">
+      <div class="container">
+        <div class="section-header">
+          <h2>Horarios y Lugar</h2>
+          <p>Visítanos o ponte en contacto con nosotros</p>
+        </div>
+        <div class="contact-layout">
+          <div class="contact-info">
+            <div class="info-card">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <div>
+                <h4>Nuestra Dirección</h4>
+                <p>Av. Brigadier General Juan Manuel de Rosas 2914 (1er Piso),<br>San Justo, Buenos Aires, Argentina (CP 1754)</p>
+              </div>
+            </div>
+            
+            <div class="info-card">
+              <i class="fa-solid fa-clock"></i>
+              <div>
+                <h4>Reuniones</h4>
+                <p>Domingos 16:00 hs (Escuela Bíblica)<br>Domingos 17:00 hs (Culto General)</p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <i class="fa-solid fa-envelope"></i>
+              <div>
+                <h4>Email</h4>
+                <p><a href="mailto:icpdcontacto@gmail.com">icpdcontacto@gmail.com</a></p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <i class="fa-solid fa-phone"></i>
+              <div>
+                <h4>WhatsApp / Teléfono</h4>
+                <p><a href="https://api.whatsapp.com/send?phone=%2B541125025499" target="_blank" rel="noopener noreferrer">+54 9 11 2502-5499</a></p>
+              </div>
+            </div>
+            
+            <div class="contact-cta">
+              <a href="https://api.whatsapp.com/send?phone=%2B541125025499" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp"><i class="fa-brands fa-whatsapp"></i> Envíanos un WhatsApp</a>
+            </div>
+          </div>
+          <div class="contact-map">
+            <!-- Leaflet Interactive Map container -->
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Video Modal -->
+  <div class="modal" id="video-modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <button class="modal-close" id="modal-close" title="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-minimize" id="modal-minimize" title="Minimizar (Modo flotante)"><i class="fa-solid fa-compress"></i></button>
+      <div class="video-container">
+        <iframe id="modal-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <!-- Control de volumen turbo para Videos -->
+      <div class="video-booster-panel" style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:15px; padding:10px; background:rgba(0,0,0,0.6); border-radius:8px; border:1px solid rgba(204,164,59,0.3);">
+        <i class="fa-solid fa-volume-high" style="color:var(--color-gold);"></i>
+        <span style="font-size:0.85rem; color:#fff; font-weight:bold;">Volumen Turbo:</span>
+        <input type="range" id="video-volume-booster" min="1" max="10" step="0.5" value="1" style="width:120px; cursor:pointer; accent-color:var(--color-gold);">
+        <span id="video-booster-val" style="font-size:0.85rem; color:var(--color-gold); font-weight:bold; min-width:30px;">1x</span>
+        <span style="font-size:0.75rem; color:var(--color-text-muted); margin-left:10px;">(Nota: La amplificación turbo aplica a videos locales; YouTube limita la amplificación externa por iframe)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF Modal -->
+  <div class="modal" id="pdf-modal">
+    <div class="modal-content" style="max-width: 900px; height: 85vh; display: flex; flex-direction: column; padding: 0; background: var(--color-bg);">
+      <button class="modal-close" id="pdf-modal-close" style="top: -15px; right: -15px; z-index: 20;"><i class="fa-solid fa-xmark"></i></button>
+      <div style="padding: 15px 20px; background: var(--color-bg-dark); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; border-radius: 8px 8px 0 0;">
+        <h3 id="pdf-modal-title" style="margin: 0; font-size: 1.1rem; color: var(--color-gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%;">Visor PDF</h3>
+        <div style="display: flex; gap: 10px;">
+          <a id="pdf-modal-download" href="#" download class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;"><i class="fa-solid fa-download"></i> Descargar</a>
+          <button id="pdf-modal-share" class="btn" style="padding: 6px 12px; font-size: 0.85rem; background: #25D366; color: white; border-color: #25D366;"><i class="fa-brands fa-whatsapp"></i> Compartir</button>
+        </div>
+      </div>
+      <div style="flex-grow: 1; height: 100%; position: relative;">
+        <iframe id="pdf-modal-iframe" src="" style="width: 100%; height: 100%; border: none; border-radius: 0 0 8px 8px; background: white;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox Modal para Galería de Fotos y Carátulas -->
+  <div class="lightbox" id="gallery-lightbox">
+    <button class="lightbox-close" id="lightbox-close">&times;</button>
+    <button class="lightbox-prev" id="lightbox-prev" style="position:absolute; left:20px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:none; z-index:1100;"><i class="fa-solid fa-chevron-left"></i></button>
+    <img id="lightbox-img" src="" alt="Vista ampliada">
+    <button class="lightbox-next" id="lightbox-next" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.6); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:none; z-index:1100;"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+
+  <!-- PWA Install Modal -->
+  <div class="modal" id="pwa-install-modal">
+    <div class="modal-content" style="max-width: 450px; text-align: center; padding: 30px;">
+      <i class="fa-solid fa-mobile-screen-button" style="font-size: 3rem; color: var(--color-gold); margin-bottom: 15px;"></i>
+      <h3 style="margin-bottom: 15px; color: var(--color-gold); font-family: var(--font-title);">¡Instala Nuestra App!</h3>
+      <p style="margin-bottom: 25px; color: var(--color-text-white);">Obtén acceso directo y más rápido a nuestras predicas, clases y actividades desde tu dispositivo, instalando la web como una aplicación nativa.</p>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button id="pwa-install-btn" class="btn btn-primary" style="flex: 1;"><i class="fa-solid fa-download"></i> Instalar App</button>
+        <button id="pwa-cancel-btn" class="btn btn-secondary" style="flex: 1;">Quizás luego</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Modal (Carga manual de sermones) -->
+  <div class="modal" id="admin-modal">
+    <div class="modal-content" style="max-width: 620px; padding: 25px; color: var(--color-text-white);">
+      <button class="modal-close" id="admin-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="margin-bottom: 20px; color: var(--color-gold); font-family: var(--font-title);"><i class="fa-solid fa-lock-open"></i> Panel de Administración</h3>
+      
+      <!-- Key entry (Step 1) -->
+      <div id="admin-auth-sec">
+        <label for="admin-pass" style="display:block; margin-bottom: 8px;">Ingrese la clave de acceso:</label>
+        <input type="password" id="admin-pass" placeholder="Clave..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: var(--color-bg-card-alt); color:#fff; margin-bottom: 15px;">
+        <button id="btn-auth-submit" class="btn btn-primary" style="width:100%;">Ingresar</button>
+        <p id="auth-err" style="color:#ef4444; font-size:0.85rem; margin-top:10px; display:none;">Clave incorrecta</p>
+      </div>
+
+      <!-- Panel con pestañas (Step 2 - hidden initially) -->
+      <div id="admin-form-sec" style="display:none;">
+        <!-- Tabs -->
+        <div class="admin-tabs">
+          <button class="admin-tab active" data-tab="tab-sermons"><i class="fa-solid fa-book-open"></i> Sermón</button>
+          <button class="admin-tab" data-tab="tab-photo"><i class="fa-solid fa-image"></i> Foto</button>
+          <button class="admin-tab" data-tab="tab-clases"><i class="fa-solid fa-person-chalkboard"></i> Clases (Audio/Video)</button>
+          <button class="admin-tab" data-tab="tab-library"><i class="fa-solid fa-book"></i> Libro</button>
+          <button class="admin-tab" data-tab="tab-frases"><i class="fa-solid fa-quote-left"></i> Frases</button>
+          <button class="admin-tab" data-tab="tab-actividades"><i class="fa-regular fa-calendar-days"></i> Actividades</button>
+          <button class="admin-tab" data-tab="tab-hero"><i class="fa-solid fa-home"></i> Inicio</button>
+          <button class="admin-tab" data-tab="tab-edit-list" id="btn-tab-edit-list"><i class="fa-solid fa-pen-to-square"></i> Edición</button>
+        </div>
+        
+        <div style="text-align: center; margin-top: 10px; margin-bottom: 15px; font-size: 0.9rem; color: var(--color-gold);">
+          📊 <b id="admin-visits-counter">Total de Visitas: Cargando...</b>
+        </div>
+
+        <!-- TAB HERO (INICIO) -->
+        <div id="tab-hero" class="admin-tab-content">
+          <form id="hero-settings-form">
+            <h4 style="color:var(--color-gold); margin-bottom:12px;"><i class="fa-solid fa-images"></i> Textos Principales y Logo</h4>
+            <div class="admin-field"><label>Título de la Web:</label><input type="text" id="form-hero-title" required></div>
+            <div class="admin-field"><label>Subtítulo de la Web:</label><input type="text" id="form-hero-subtitle" required></div>
+            <div class="admin-field">
+              <label>Reemplazar Logo Principal (Opcional):</label>
+              <input type="file" id="form-hero-logo-file" accept="image/*" class="admin-file-input">
+              <div class="admin-or">— o URL de imagen —</div>
+              <input type="text" id="form-hero-logo-url" placeholder="https://...">
+            </div>
+            
+            <h4 style="color:var(--color-gold); margin-top:20px; margin-bottom:12px;"><i class="fa-solid fa-hand-pointer"></i> Botones de la Pantalla Principal</h4>
+            <div id="hero-buttons-editor">
+              <!-- Botones agregados dinámicamente -->
+            </div>
+            <button type="button" id="btn-add-hero-btn" class="btn btn-secondary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-plus"></i> Añadir Nuevo Botón</button>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px;"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar Configuración de Inicio</button>
+          </form>
+        </div>
+
+        <!-- TAB SERMONS -->
+        <div id="tab-sermons" class="admin-tab-content active">
+          <form id="sermon-upload-form">
+            <div class="admin-field"><label>Nº Sermón:</label><input type="number" id="form-sermon-id" required placeholder="72"></div>
+            <div class="admin-field"><label>Título:</label><input type="text" id="form-sermon-title" required placeholder="EL EVANGELIO SEGÚN MATEO..."></div>
+            <div class="admin-field"><label>Subtítulo (Opcional):</label><input type="text" id="form-sermon-subtitle" placeholder="Ej: La importancia de la fe..."></div>
+            <div class="admin-field"><label>Predicador:</label><input type="text" id="form-sermon-speaker" value="Pastor Sergio Hamdan" required></div>
+            <div class="admin-field"><label>Fecha:</label><input type="date" id="form-sermon-date" required></div>
+            <div class="admin-field">
+              <label>Audio (archivo MP3/WAV/OGG/MPEG/WhatsApp o URL):</label>
+              <input type="text" id="form-sermon-audio-url" placeholder="URL de audio o nombre de archivo...">
+              <div class="admin-or">— o importar archivo —</div>
+              <input type="file" id="form-sermon-audio-file" accept="audio/*,video/mp4,video/mpeg,.mpeg,.mp3,.ogg,.wav,.m4a,.opus,.aac" class="admin-file-input">
+            </div>
+            <div class="admin-field">
+              <label>Video YouTube (URL):</label>
+              <input type="text" id="form-sermon-video" placeholder="https://www.youtube.com/embed/ID o watch?v=ID">
+            </div>
+            <div class="admin-field">
+              <label>Video archivo (MP4/MKV/etc):</label>
+              <input type="file" id="form-sermon-video-file" accept="video/*" class="admin-file-input">
+            </div>
+            <div class="admin-field">
+              <label>Imagen de portada del sermón:</label>
+              <input type="file" id="form-sermon-cover-file" accept="image/*" class="admin-file-input" multiple>
+              <div class="admin-or">— o URL de portada —</div>
+              <input type="text" id="form-sermon-cover-url" placeholder="https://... portada de prédica">
+            </div>
+            <div class="admin-field">
+              <label>Importador PDF:</label>
+              <input type="text" id="form-sermon-pdf" placeholder="URL o nombre del PDF...">
+              <div class="admin-or">— o importar archivo —</div>
+              <input type="file" id="form-sermon-pdf-file" accept="application/pdf" class="admin-file-input">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-cloud-arrow-up"></i> Guardar Sermón</button>
+          </form>
+        </div>
+
+        <!-- TAB PHOTO -->
+        <div id="tab-photo" class="admin-tab-content">
+          <form id="photo-upload-form">
+            <div class="admin-field"><label>Descripción / Pie de foto:</label><input type="text" id="form-photo-caption" placeholder="Ej: Culto del 5 de Julio 2026"></div>
+            <div class="admin-field">
+              <label>Importar fotos (JPG, PNG, WEBP, etc.):</label>
+              <input type="file" id="form-photo-file" accept="image/*" class="admin-file-input" multiple>
+              <small style="color: var(--color-text-muted); font-size: 0.75rem;">Puedes seleccionar varias imágenes a la vez.</small>
+            </div>
+            <div class="admin-or">— o usar URL de imagen (Facebook, etc.) —</div>
+            <div class="admin-field"><label>URL de imagen:</label><input type="text" id="form-photo-url" placeholder="https://..."></div>
+            <div id="photo-preview-container" style="display:none; margin: 10px 0; text-align:center;">
+              <img id="photo-preview" style="max-width:100%; max-height:150px; border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-image"></i> Agregar Foto a la Galería</button>
+          </form>
+        </div>
+
+        <!-- TAB CLASES (Audio/Video) -->
+        <div id="tab-clases" class="admin-tab-content">
+          <form id="clases-upload-form">
+            <div class="admin-field"><label>Título de la Clase/Alabanza:</label><input type="text" id="form-clases-title" required placeholder="Ej: Método Inductivo / Cuán Grande..."></div>
+            <div class="admin-field"><label>Autor / Predicador:</label><input type="text" id="form-clases-author" placeholder="Alabanza ICPD / Pastor Sergio"></div>
+            
+            <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+              <h4 style="color:var(--color-gold); margin-bottom: 10px;">Opción 1: Archivo o Enlace de AUDIO</h4>
+              <label>Importar archivo (MP3, M4A, WAV):</label>
+              <input type="file" id="form-clases-audio-file" accept="audio/*" class="admin-file-input">
+              <div class="admin-or">— o URL —</div>
+              <input type="text" id="form-clases-audio-url" placeholder="https://...mp3">
+            </div>
+
+            <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+              <h4 style="color:var(--color-gold); margin-bottom: 10px;">Opción 2: Archivo o Enlace de VIDEO</h4>
+              <label>Importar archivo (MP4, MKV):</label>
+              <input type="file" id="form-clases-video-file" accept="video/*" class="admin-file-input">
+              <div class="admin-or">— o URL de YouTube —</div>
+              <input type="text" id="form-clases-yt-url" placeholder="https://youtu.be/ID">
+            </div>
+
+            <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+              <h4 style="color:var(--color-gold); margin-bottom: 10px;">Carátula (Para Audios)</h4>
+              <label>Importar imagen de portada:</label>
+              <input type="file" id="form-clases-cover-file" accept="image/*" class="admin-file-input">
+              <div class="admin-or">— o URL de la imagen —</div>
+              <input type="text" id="form-clases-cover-url" placeholder="https://...jpg">
+            </div>
+
+            <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+              <label>Sección destino:</label>
+              <select id="form-clases-section" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff;">
+                <option value="eb">📖 Clases de Escuela Bíblica</option>
+                <option value="songs">🎵 Canciones / Alabanzas</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-cloud-arrow-up"></i> Agregar Clase/Canción</button>
+          </form>
+        </div>
+
+        <!-- TAB LIBRARY -->
+        <div id="tab-library" class="admin-tab-content">
+          <form id="library-upload-form">
+            <div class="admin-field"><label>Título del Libro:</label><input type="text" id="form-lib-title" required placeholder="Ej: Progreso del Peregrino"></div>
+            <div class="admin-field"><label>Autor (Opcional):</label><input type="text" id="form-lib-author" placeholder="Ej: John Bunyan"></div>
+            <div class="admin-field">
+              <label>Archivo PDF del Libro:</label>
+              <input type="file" id="form-lib-pdf-file" accept="application/pdf" class="admin-file-input">
+              <div class="admin-or">— o URL del PDF —</div>
+              <input type="text" id="form-lib-pdf-url" placeholder="https://...pdf">
+            </div>
+            <div class="admin-field">
+              <label>Carátula (Opcional - Si se deja vacío, se extraerá de la 1º página):</label>
+              <input type="file" id="form-lib-cover-file" accept="image/*" class="admin-file-input">
+              <div class="admin-or">— o URL de la imagen —</div>
+              <input type="text" id="form-lib-cover-url" placeholder="https://...jpg">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-book"></i> Agregar Libro</button>
+          </form>
+        </div>
+
+        <!-- TAB FRASES -->
+        <div id="tab-frases" class="admin-tab-content">
+          <form id="frase-upload-form">
+            <div class="admin-field">
+              <label>Imagen de la Frase:</label>
+              <input type="file" id="form-frase-file" accept="image/*" class="admin-file-input">
+            </div>
+            <div class="admin-or">— o URL de la imagen —</div>
+            <div class="admin-field"><input type="text" id="form-frase-url" placeholder="https://..."></div>
+            <div class="admin-field" style="margin-top: 15px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--color-gold);">
+                <input type="checkbox" id="form-frase-priority" style="width: 20px; height: 20px; cursor:pointer;"> 
+                <strong>🌟 Establecer como Prioridad (Mostrar inmediatamente)</strong>
+              </label>
+              <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:5px;">Si marcas esto, la frase reemplazará a la actual al instante y el contador de 4 horas se reiniciará.</p>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-quote-left"></i> Subir Frase</button>
+          </form>
+
+          <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+            <h4 style="color: var(--color-gold); margin-bottom: 10px;"><i class="fa-solid fa-images"></i> Frases Subidas (Orden de Rotación)</h4>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 15px;">Aquí puedes ver todas tus frases. La primera es la que tiene mayor prioridad o se mostrará a continuación.</p>
+            <div id="admin-frases-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+              <!-- Dynamically rendered thumbnails by app.js -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB ACTIVIDADES -->
+        <div id="tab-actividades" class="admin-tab-content">
+          <form id="actividades-upload-form">
+            <div class="admin-field">
+              <label>Día de la Actividad:</label>
+              <select id="form-actividad-dia" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff;" required>
+                <option value="Domingos">Domingos</option>
+                <option value="Semana">Semana</option>
+              </select>
+            </div>
+            <div class="admin-field">
+              <label>Horario:</label>
+              <input type="text" id="form-actividad-horario" placeholder="Ej: 16:00 hs o Consultar Horarios" required>
+            </div>
+            <div class="admin-field">
+              <label>Título de la Actividad:</label>
+              <input type="text" id="form-actividad-titulo" placeholder="Ej: Escuela Bíblica" required>
+            </div>
+            <div class="admin-field">
+              <label>Descripción / Detalles:</label>
+              <textarea id="form-actividad-desc" rows="3" placeholder="Detalles de la actividad..." style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff; font-family:inherit; resize:vertical;" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-regular fa-calendar-plus"></i> Guardar Actividad</button>
+          </form>
+        </div>
+
+        <!-- TAB EDIT LIST -->
+        <div id="tab-edit-list" class="admin-tab-content">
+          <div class="admin-field">
+            <label>Selecciona el tipo de recurso:</label>
+            <select id="edit-resource-type" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff; margin-bottom:15px;">
+              <option value="sermons">📖 Sermones dominicales</option>
+              <option value="actividades">📅 Agenda / Actividades</option>
+              <option value="frases">💬 Frases Rotativas</option>
+              <option value="library">📚 Biblioteca (Libros)</option>
+              <option value="photos">📷 Fotos de la iglesia</option>
+              <option value="songs">🎵 Canciones / Alabanzas</option>
+              <option value="eb">📚 Clases EB (Audio/Video)</option>
+              <option value="materials">📁 Materiales de Estudio</option>
+            </select>
+          </div>
+          <div id="admin-edit-items-container" style="display:flex; flex-direction:column; gap:10px; max-height:40vh; overflow-y:auto; padding-right:5px; margin-top:10px;">
+            <!-- Contenido interactivo generado por JS -->
+          </div>
+          
+          <!-- Formulario de Edición de Sermón Detallado (Inicialmente oculto) -->
+          <div id="sermon-detail-edit-form-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+            <h4 style="color:var(--color-gold); margin-bottom:12px;"><i class="fa-solid fa-edit"></i> Editar Sermón Completo</h4>
+            <form id="sermon-detail-edit-form">
+              <input type="hidden" id="edit-sermon-idx">
+              <div class="admin-field"><label>Título:</label><input type="text" id="edit-sermon-title" required></div>
+              <div class="admin-field"><label>Subtítulo (Opcional):</label><input type="text" id="edit-sermon-subtitle" placeholder="Ej: La importancia de la fe..."></div>
+              <div class="admin-field"><label>Predicador:</label><input type="text" id="edit-sermon-speaker" required></div>
+              <div class="admin-field"><label>Fecha:</label><input type="date" id="edit-sermon-date" required></div>
+              <div class="admin-field">
+                <label>Audio (archivo MPEG/WhatsApp/MP3 o URL):</label>
+                <input type="text" id="edit-sermon-audio-url" placeholder="URL o nombre de archivo de audio...">
+                <input type="file" id="edit-sermon-audio-file" accept="audio/*,video/mp4,video/mpeg,.mpeg,.mp3,.ogg,.wav,.m4a,.opus,.aac" class="admin-file-input">
+                <label style="font-size:0.8rem; color:#ff6b6b; display:flex; gap:5px; margin-top:8px; align-items:center;"><input type="checkbox" id="edit-sermon-remove-audio"> Eliminar archivo/enlace guardado</label>
+              </div>
+              <div class="admin-field">
+                <label>Video YouTube (URL):</label>
+                <input type="text" id="edit-sermon-video-url">
+                <label style="font-size:0.8rem; color:#ff6b6b; display:flex; gap:5px; margin-top:8px; align-items:center;"><input type="checkbox" id="edit-sermon-remove-video"> Eliminar Video guardado</label>
+              </div>
+              <div class="admin-field">
+                <label>Video archivo (MP4/MKV/etc):</label>
+                <input type="file" id="edit-sermon-video-file" accept="video/*" class="admin-file-input">
+              </div>
+              <div class="admin-field">
+                <label>Imagen de portada del sermón:</label>
+                <input type="file" id="edit-sermon-cover-file" accept="image/*" class="admin-file-input" multiple>
+                <input type="text" id="edit-sermon-cover-url" placeholder="URL de la portada...">
+              </div>
+              <div class="admin-field">
+                <label>Importador PDF:</label>
+                <input type="text" id="edit-sermon-pdf" placeholder="URL o nombre del PDF...">
+                <div class="admin-or">— o importar archivo —</div>
+                <input type="file" id="edit-sermon-pdf-file" accept="application/pdf" class="admin-file-input">
+                <label style="font-size:0.8rem; color:#ff6b6b; display:flex; gap:5px; margin-top:8px; align-items:center;"><input type="checkbox" id="edit-sermon-remove-pdf"> Eliminar PDF guardado</label>
+              </div>
+              <div style="display:flex; gap:10px; margin-top:10px;">
+                <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-check"></i> Guardar Cambios</button>
+                <button type="button" id="edit-sermon-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Formulario de Edición Detallada Biblioteca -->
+          <div id="library-detail-edit-form-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+            <h4 style="color:var(--color-gold); margin-bottom:12px;"><i class="fa-solid fa-book"></i> Editar Libro de Biblioteca</h4>
+            <form id="library-detail-edit-form">
+              <input type="hidden" id="edit-lib-idx">
+              <div class="admin-field"><label>Título del Libro:</label><input type="text" id="edit-lib-title" required></div>
+              <div class="admin-field"><label>Autor:</label><input type="text" id="edit-lib-author" required></div>
+              <div class="admin-field">
+                <label>Reemplazar PDF:</label>
+                <input type="text" id="edit-lib-pdf-url" placeholder="URL del PDF...">
+                <div class="admin-or">— o importar archivo —</div>
+                <input type="file" id="edit-lib-pdf-file" accept="application/pdf" class="admin-file-input">
+              </div>
+              <div class="admin-field">
+                <label>Reemplazar Portada (Imagen):</label>
+                <input type="text" id="edit-lib-cover-url" placeholder="URL de la portada...">
+                <div class="admin-or">— o importar archivo —</div>
+                <input type="file" id="edit-lib-cover-file" accept="image/*" class="admin-file-input">
+                <small style="color: var(--color-text-muted); font-size: 0.75rem;">Si cambias el PDF (archivo o URL) pero dejas la portada en blanco, se intentará extraer automáticamente la primera hoja del nuevo PDF.</small>
+              </div>
+              <div style="display:flex; gap:10px; margin-top:10px;">
+                <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-check"></i> Guardar Libro</button>
+                <button type="button" id="edit-lib-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          </div>
+
+          <!-- Formulario de Edición Detallada Clases EB -->
+          <div id="clases-detail-edit-form-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+            <h4 style="color:var(--color-gold); margin-bottom:12px;"><i class="fa-solid fa-person-chalkboard"></i> Editar Clase EB</h4>
+            <form id="clases-detail-edit-form">
+              <input type="hidden" id="edit-clases-idx">
+              <div class="admin-field"><label>Título de la Clase:</label><input type="text" id="edit-clases-title" required></div>
+              <div class="admin-field"><label>Autor / Predicador:</label><input type="text" id="edit-clases-author"></div>
+              
+              <div class="admin-field">
+                <label>Formato (Al cambiar URL o archivo):</label>
+                <select id="edit-clases-type" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff;">
+                  <option value="audio">Audio (Usa la barra dorada inferior)</option>
+                  <option value="video">Video (Abre en ventana flotante)</option>
+                </select>
+              </div>
+              
+              <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+                <h4 style="color:var(--color-gold); margin-bottom: 10px;">Reemplazar Audio / Video</h4>
+                <label>Importar archivo (MP3, MP4, etc.):</label>
+                <input type="file" id="edit-clases-file" accept="audio/*,video/*" class="admin-file-input">
+                <div class="admin-or">— o URL (Audio o YouTube) —</div>
+                <input type="text" id="edit-clases-url" placeholder="https://...">
+              </div>
+              <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+                <h4 style="color:var(--color-gold); margin-bottom: 10px;">Reemplazar Carátula (Para Audios)</h4>
+                <label>Importar imagen de portada:</label>
+                <input type="file" id="edit-clases-cover-file" accept="image/*" class="admin-file-input">
+                <div class="admin-or">— o URL de la imagen —</div>
+                <input type="text" id="edit-clases-cover-url" placeholder="https://...jpg">
+              </div>
+              
+              <div style="display:flex; gap:10px; margin-top:10px;">
+                <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-check"></i> Guardar Clase</button>
+                <button type="button" id="edit-clases-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="actividad-detail-edit-form-container" style="display:none; margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+            <h4 style="color:var(--color-gold); margin-bottom:12px;"><i class="fa-regular fa-calendar-days"></i> Editar Actividad</h4>
+            <form id="actividad-detail-edit-form">
+              <input type="hidden" id="edit-actividad-idx">
+              <div class="admin-field">
+                <label>Día de la Actividad:</label>
+                <select id="edit-actividad-dia" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff;" required>
+                  <option value="Domingos">Domingos</option>
+                  <option value="Semana">Semana</option>
+                </select>
+              </div>
+              <div class="admin-field">
+                <label>Horario:</label>
+                <input type="text" id="edit-actividad-horario" required>
+              </div>
+              <div class="admin-field">
+                <label>Título de la Actividad:</label>
+                <input type="text" id="edit-actividad-titulo" required>
+              </div>
+              <div class="admin-field">
+                <label>Descripción / Detalles:</label>
+                <textarea id="edit-actividad-desc" rows="3" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff; font-family:inherit; resize:vertical;" required></textarea>
+              </div>
+              <div style="display:flex; gap:10px; margin-top:10px;">
+                <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-check"></i> Guardar Actividad</button>
+                <button type="button" id="edit-actividad-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff;"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+
+        <p id="admin-success" style="color:#4ade80; font-size:0.9rem; text-align:center; margin-top:15px; display:none;"><i class="fa-solid fa-circle-check"></i> ¡Guardado exitosamente!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Bar (Persistent mini-player) -->
+  <div class="audio-player-bar" id="audio-player-bar">
+    <div class="audio-info">
+      <span class="audio-title" id="player-title">Ningún sermón seleccionado</span>
+      <span class="audio-subtitle" id="player-subtitle">Pastor Sergio Hamdan</span>
+    </div>
+    <div class="audio-controls">
+      <audio id="main-audio" src=""></audio>
+      <button id="player-play-btn" class="player-btn"><i class="fa-solid fa-play"></i></button>
+      <div class="progress-container" id="player-progress-container">
+        <div class="progress-bar" id="player-progress-bar"></div>
+      </div>
+      <span class="time-display" id="player-time">00:00 / 00:00</span>
+      
+      <!-- Control de Amplificación Extrema -->
+      <div class="booster-container" style="display:flex; align-items:center; gap:8px; margin: 0 10px; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(204,164,59,0.3);">
+        <i class="fa-solid fa-volume-high" style="color: var(--color-gold); font-size: 0.85rem;" title="Amplificación de volumen para parlantes débiles"></i>
+        <span style="font-size:0.75rem; color:#fff; font-weight:bold; min-width:40px;">Turbo:</span>
+        <input type="range" id="volume-booster" min="1" max="10" step="0.5" value="1" style="width: 70px; cursor: pointer; accent-color: var(--color-gold);">
+        <span id="booster-val" style="font-size:0.75rem; color:var(--color-gold); min-width:25px; font-weight:bold;">1x</span>
+      </div>
+      
+      <button id="player-close-btn" class="player-btn-close" title="Cerrar reproductor"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <img class="footer-logo" id="footer-logo-img" src="https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157" alt="ICPD Logo">
+        <h3>Iglesia Cristiana Pueblo de Dios</h3>
+        <p>Abreviado como ICPD. San Justo, Buenos Aires.</p>
+        <p style="font-size: 0.85rem; color: var(--color-gold); margin-top: 15px; font-weight: bold;">Versión 1.13</p>
+      </div>
+      <div class="footer-socials">
+        <h4>Síguenos en Redes Sociales</h4>
+        <div class="social-icons">
+          <a href="https://www.facebook.com/ICPdeDios/?locale=es_LA" target="_blank" rel="noopener noreferrer" class="facebook" title="Facebook Oficial"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.youtube.com/ICPdeDios" target="_blank" rel="noopener noreferrer" class="youtube" title="Canal de YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://api.whatsapp.com/send?phone=%2B541125025499" target="_blank" rel="noopener noreferrer" class="whatsapp" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+        <button id="btn-manual-install" class="btn btn-primary" style="margin-top: 15px; font-size: 0.85rem; padding: 8px 15px;"><i class="fa-solid fa-download"></i> Instalar Web App</button>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Iglesia Cristiana Pueblo de Dios (ICPD). Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- Auto-limpieza de Service Workers viejos para que el usuario siempre vea la versión actualizada -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let reg of registrations) {
+          reg.update(); // Fuerza verificar si hay una versión nueva del SW
+        }
+      });
+    }
+  </script>
+  <!-- Modal de PWA Install -->
+  <div class="modal" id="pwa-install-modal">
+    <div class="modal-content" style="text-align:center; max-width:400px; padding:30px 20px;">
+      <i class="fa-solid fa-download" style="font-size:3rem; color:var(--color-gold); margin-bottom:15px;"></i>
+      <h3 style="color:var(--color-gold); margin-bottom:10px;">Instalar Aplicación ICPD</h3>
+      <p style="color:var(--color-text-muted); font-size:0.95rem; margin-bottom:25px;">Descarga nuestra aplicación oficial en tu dispositivo para acceder rápidamente a todas las enseñanzas, biblioteca y sermones en cualquier momento.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-primary" id="pwa-install-btn" style="width:100%;"><i class="fa-solid fa-mobile-screen"></i> Instalar Aplicación</button>
+        <button class="btn" id="pwa-cancel-btn" style="width:100%; background:rgba(255,255,255,0.05); color:#fff;">Más tarde</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS for Interactive Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js?v=1.13"></script>
+</body>
+</html>

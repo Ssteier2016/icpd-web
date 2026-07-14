@@ -1,0 +1,10 @@
+*.mp4
+*.mpeg
+*.jpeg
+*.jpg
+*.pdf
+*.mp3
+*.wav
+.firebase/
+node_modules/
+*.log
