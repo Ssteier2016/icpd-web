@@ -50,9 +50,34 @@ let deferredPrompt;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker registrado correctamente.', reg.scope))
+      .then(reg => {
+        console.log('Service Worker registrado correctamente.', reg.scope);
+        
+        // Detectar actualizaciones de la aplicación
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              mostrarBannerActualizacion();
+            }
+          });
+        });
+      })
       .catch(err => console.error('Error al registrar Service Worker:', err));
   });
+}
+
+function mostrarBannerActualizacion() {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--color-gold); color:#000; padding:12px 20px; border-radius:8px; z-index:9999; box-shadow:0 10px 25px rgba(0,0,0,0.5); font-weight:bold; display:flex; gap:15px; align-items:center; cursor:pointer;';
+  banner.innerHTML = `
+    <span><i class="fa-solid fa-rotate"></i> ¡Hay una nueva actualización disponible!</span>
+    <button style="background:#0f172a; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">Actualizar</button>
+  `;
+  banner.addEventListener('click', () => {
+    window.location.reload();
+  });
+  document.body.appendChild(banner);
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -1259,8 +1284,10 @@ function initModals() {
       item.style.cssText = 'position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.1);';
       
       let badgeHtml = isActual 
-        ? '<div style="position:absolute; top:2px; left:2px; background:var(--color-gold); color:#000; font-size:0.6rem; padding:2px 4px; border-radius:3px; font-weight:bold; z-index:2;">' + (idx+1) + 'º (Actual)</div><div id="admin-frase-timer" style="position:absolute; bottom:0; left:0; background:rgba(0,0,0,0.85); color:var(--color-gold); font-size:0.65rem; padding:4px 0; font-weight:bold; width:100%; text-align:center; z-index:2; border-top:1px solid rgba(204,163,82,0.3);">Calculando...</div>' 
+        ? '<div style="position:absolute; top:2px; left:2px; background:var(--color-gold); color:#000; font-size:0.6rem; padding:2px 4px; border-radius:3px; font-weight:bold; z-index:2;">' + (idx+1) + 'º (Actual)</div>' 
         : '<div style="position:absolute; top:2px; left:2px; background:rgba(0,0,0,0.7); color:#fff; font-size:0.6rem; padding:2px 4px; border-radius:3px; font-weight:bold; z-index:2;">' + (idx+1) + 'º</div>';
+
+      let timerHtml = `<div class="admin-frase-timer" data-idx="${idx}" style="position:absolute; bottom:0; left:0; background:rgba(0,0,0,0.85); color:var(--color-gold); font-size:0.65rem; padding:4px 0; font-weight:bold; width:100%; text-align:center; z-index:2; border-top:1px solid rgba(204,163,82,0.3);">Calculando...</div>`;
 
       item.innerHTML = `
         <img src="${frase.url}" style="width: 100%; height: 100%; object-fit: cover; z-index:1; position:relative;">
@@ -1269,32 +1296,48 @@ function initModals() {
           <button class="btn btn-sm" style="background: #ef4444; color: #fff; padding: 5px 10px; font-size: 0.75rem; min-width:30px;" title="Eliminar" onclick="eliminarFrase(${idx})"><i class="fa-solid fa-trash"></i></button>
         </div>
         ${badgeHtml}
+        ${timerHtml}
       `;
       grid.appendChild(item);
     });
 
-    if (FRASES.length > 1) {
+    if (FRASES.length > 0) {
       adminFraseTimerInterval = setInterval(() => {
-        const timerEl = document.getElementById('admin-frase-timer');
-        if (!timerEl) return;
-        
         let est = JSON.parse(localStorage.getItem('icpd_frases_estado'));
         if (!est) return;
         
         const cuatroHoras = 4 * 60 * 60 * 1000;
-        let timeLeft = cuatroHoras - (Date.now() - est.lastRotation);
-        if (timeLeft <= 0) {
-           timeLeft = 0;
+        let timeLeftCurrent = cuatroHoras - (Date.now() - est.lastRotation);
+        
+        if (timeLeftCurrent <= 0 && FRASES.length > 1) {
            renderFraseRotativa(); 
            renderAdminFrasesGrid();
            return;
         }
-        
-        const hrs = Math.floor(timeLeft / (1000 * 60 * 60));
-        const mins = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((timeLeft % (1000 * 60)) / 1000);
-        
-        timerEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${hrs}h ${mins}m ${secs}s`;
+
+        const timers = document.querySelectorAll('.admin-frase-timer');
+        timers.forEach(timerEl => {
+          const idx = parseInt(timerEl.getAttribute('data-idx'));
+          let waitTime = 0;
+          
+          if (idx === est.currentIndex) {
+             waitTime = timeLeftCurrent;
+          } else {
+             let steps = idx - est.currentIndex;
+             if (steps < 0) steps += FRASES.length;
+             waitTime = timeLeftCurrent + (steps - 1) * cuatroHoras;
+          }
+          
+          const hrs = Math.floor(waitTime / (1000 * 60 * 60));
+          const mins = Math.floor((waitTime % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((waitTime % (1000 * 60)) / 1000);
+          
+          if (idx === est.currentIndex) {
+            timerEl.innerHTML = `<i class="fa-regular fa-clock"></i> Termina en: ${hrs}h ${mins}m ${secs}s`;
+          } else {
+            timerEl.innerHTML = `<i class="fa-regular fa-clock"></i> En: ${hrs}h ${mins}m ${secs}s`;
+          }
+        });
       }, 1000);
     }
   };
