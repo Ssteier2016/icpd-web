@@ -460,8 +460,14 @@
           <form id="library-upload-form">
             <div class="admin-field"><label>Título del Libro:</label><input type="text" id="form-lib-title" required placeholder="Ej: Progreso del Peregrino"></div>
             <div class="admin-field"><label>Autor (Opcional):</label><input type="text" id="form-lib-author" placeholder="Ej: John Bunyan"></div>
+            <div class="admin-field" style="margin-bottom: 15px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--color-gold);">
+                <input type="checkbox" id="form-lib-is-physical" style="width: 20px; height: 20px; cursor:pointer;"> 
+                <strong>📚 Es un Libro Físico (Para pedir prestado)</strong>
+              </label>
+            </div>
             <div class="admin-field">
-              <label>Archivo PDF del Libro:</label>
+              <label>Archivo PDF del Libro (Opcional si es físico):</label>
               <input type="file" id="form-lib-pdf-file" accept="application/pdf" class="admin-file-input">
               <div class="admin-or">— o URL del PDF —</div>
               <input type="text" id="form-lib-pdf-url" placeholder="https://...pdf">

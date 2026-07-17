@@ -175,12 +175,14 @@ function renderLibrary() {
     card.innerHTML = `
       <img src="${coverUrl}" class="library-cover" alt="Portada de ${book.title}">
       <div class="library-info">
-        <h3 class="library-title">${book.title}</h3>
+        <h3 class="library-title">${book.isPhysical ? '📚 ' : ''}${book.title}</h3>
         <span class="library-author">${book.author ? `<i class="fa-solid fa-pen-nib"></i> ${book.author}` : ''}</span>
         
         <div class="btn-download-container" id="lib-btn-cont-${idx}">
-          <div class="btn-download-progress" id="lib-btn-prog-${idx}"></div>
-          <div class="btn-download-text" id="lib-btn-text-${idx}"><i class="fa-solid fa-download"></i> Descargar</div>
+          ${book.isPhysical ? '' : `<div class="btn-download-progress" id="lib-btn-prog-${idx}"></div>`}
+          <div class="btn-download-text" id="lib-btn-text-${idx}">
+            ${book.isPhysical ? '<i class="fa-brands fa-whatsapp"></i> Pedir' : '<i class="fa-solid fa-download"></i> Descargar'}
+          </div>
         </div>
       </div>
     `;
@@ -189,34 +191,44 @@ function renderLibrary() {
     
     // Configurar evento de botón
     const btnCont = document.getElementById(`lib-btn-cont-${idx}`);
-    const btnProg = document.getElementById(`lib-btn-prog-${idx}`);
-    const btnText = document.getElementById(`lib-btn-text-${idx}`);
     
-    let state = 'download'; // 'download', 'loading', 'open'
-    
-    btnCont.addEventListener('click', () => {
-      if (state === 'download') {
-        state = 'loading';
-        btnText.innerHTML = 'Descargando...';
-        btnProg.style.width = '0%';
-        
-        // Simular descarga progresiva
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += Math.random() * 20;
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-            state = 'open';
-            btnText.innerHTML = '<i class="fa-solid fa-book-open"></i> Abrir';
-            btnCont.style.background = '#22c55e'; // Verde éxito
-            btnProg.style.display = 'none'; // ocultar barra
-            // Auto abrir al terminar? Opcional, pero el req pide cambiar el botón
-          }
-          btnProg.style.width = progress + '%';
-        }, 300);
-      } else if (state === 'open') {
-        openPdfModal(book.pdfUrl, book.title);
+    if (book.isPhysical) {
+      btnCont.style.background = '#25D366'; // WhatsApp green
+      btnCont.addEventListener('click', () => {
+        const message = encodeURIComponent(`Hola, quisiera consultar para pedir prestado el libro físico: "${book.title}".`);
+        window.open(`https://wa.me/541125025499?text=${message}`, '_blank');
+      });
+    } else {
+      const btnProg = document.getElementById(`lib-btn-prog-${idx}`);
+      const btnText = document.getElementById(`lib-btn-text-${idx}`);
+      
+      let state = 'download'; // 'download', 'loading', 'open'
+      
+      btnCont.addEventListener('click', () => {
+        if (state === 'download') {
+          state = 'loading';
+          btnText.innerHTML = 'Descargando...';
+          btnProg.style.width = '0%';
+          
+          // Simular descarga progresiva
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress >= 100) {
+              progress = 100;
+              clearInterval(interval);
+              state = 'open';
+              btnText.innerHTML = '<i class="fa-solid fa-book-open"></i> Abrir';
+              btnCont.style.background = '#22c55e'; // Verde éxito
+              btnProg.style.display = 'none'; // ocultar barra
+            }
+            btnProg.style.width = progress + '%';
+          }, 300);
+        } else if (state === 'open') {
+          openPdfModal(book.pdfUrl, book.title);
+        }
+      });
+    }e);
       }
     });
   });
@@ -1132,13 +1144,17 @@ function initModals() {
     const coverFile = document.getElementById('form-lib-cover-file').files[0];
     const coverUrlText = document.getElementById('form-lib-cover-url').value;
 
-    if (!pdfFile && !pdfUrl) return alert("Por favor selecciona un archivo PDF o ingresa una URL.");
+    const isPhysical = document.getElementById('form-lib-is-physical').checked;
+
+    if (!isPhysical && !pdfFile && !pdfUrl) return alert("Por favor selecciona un archivo PDF o ingresa una URL.");
 
     let pdfBase64 = '';
-    if (pdfFile) {
-      pdfBase64 = await fileToBase64(pdfFile);
-    } else {
-      pdfBase64 = pdfUrl;
+    if (!isPhysical) {
+      if (pdfFile) {
+        pdfBase64 = await fileToBase64(pdfFile);
+      } else {
+        pdfBase64 = pdfUrl;
+      }
     }
     
     let coverUrl = '';
@@ -1149,7 +1165,7 @@ function initModals() {
       coverUrl = await fileToBase64(coverFile);
     } else {
       // Extraer carátula automáticamente si hay archivo
-      if (pdfFile) {
+      if (pdfFile && !isPhysical) {
         coverUrl = await getPdfFirstPage(pdfBase64);
       }
     }
@@ -1159,7 +1175,8 @@ function initModals() {
       title,
       author,
       cover: coverUrl,
-      pdfUrl: pdfBase64
+      pdfUrl: pdfBase64,
+      isPhysical: isPhysical
     });
     db.ref('icpd_library').set(LIBRARY);
 
