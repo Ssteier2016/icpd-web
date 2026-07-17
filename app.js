@@ -253,9 +253,7 @@ function renderLibrary() {
           openPdfModal(book.pdfUrl, book.title);
         }
       });
-    }e);
-      }
-    });
+    }
   });
 }
 
