@@ -1302,7 +1302,10 @@ function initModals() {
     if (FRASES.length > 0) {
       adminFraseTimerInterval = setInterval(() => {
         let est = JSON.parse(localStorage.getItem('icpd_frases_estado'));
-        if (!est) return;
+        if (!est) {
+          est = { currentIndex: 0, lastRotation: Date.now() };
+          localStorage.setItem('icpd_frases_estado', JSON.stringify(est));
+        }
         
         const cuatroHoras = 4 * 60 * 60 * 1000;
         let timeLeftCurrent = cuatroHoras - (Date.now() - est.lastRotation);
