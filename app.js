@@ -86,23 +86,48 @@ window.addEventListener('beforeinstallprompt', (e) => {
   // Guarda el evento para dispararlo más tarde
   deferredPrompt = e;
   
-  // Muestra nuestro cartel modal elegante
-  const installModal = document.getElementById('pwa-install-modal');
-  if (installModal) {
-    installModal.classList.add('active');
+  // Muestra nuestro cartel modal elegante SOLO si no pidió cerrarlo antes
+  if (localStorage.getItem('icpd_pwa_dismissed') !== 'true' && !window.matchMedia('(display-mode: standalone)').matches) {
+    const installModal = document.getElementById('pwa-install-modal');
+    if (installModal) {
+      installModal.classList.add('active');
+    }
   }
 });
 
-// Eventos de los botones del modal de instalación
+// Eventos de los botones del modal de instalación y Compartir
 document.addEventListener('DOMContentLoaded', () => {
   const installBtn = document.getElementById('pwa-install-btn');
   const cancelBtn = document.getElementById('pwa-cancel-btn');
   const installModal = document.getElementById('pwa-install-modal');
+  const shareBtn = document.getElementById('btn-share-app');
+
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const shareData = {
+        title: 'ICPD - Iglesia Cristiana Pueblo de Dios',
+        text: 'Te invito a descargar nuestra App y escuchar nuestros sermones y música cristiana.',
+        url: window.location.href
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (err) {
+          console.log('Error compartiendo:', err);
+        }
+      } else {
+        // Fallback para navegadores antiguos de escritorio
+        navigator.clipboard.writeText(window.location.href);
+        alert('Enlace copiado al portapapeles. ¡Pégalo y compártelo!');
+      }
+    });
+  }
 
   if (installBtn && cancelBtn && installModal) {
     installBtn.addEventListener('click', async () => {
       // Oculta el cartel
       installModal.classList.remove('active');
+      localStorage.setItem('icpd_pwa_dismissed', 'true'); // No volver a mostrar
       // Muestra el prompt nativo de Chrome para generar el WebAPK
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -113,7 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     cancelBtn.addEventListener('click', () => {
+      // Oculta el modal elegante
       installModal.classList.remove('active');
+      // Guarda la preferencia para no molestarlo cada vez
+      localStorage.setItem('icpd_pwa_dismissed', 'true');
     });
   }
 

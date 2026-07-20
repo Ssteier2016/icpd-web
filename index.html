@@ -50,9 +50,14 @@
         <li><a href="#historia" class="nav-item"><i class="fa-solid fa-church"></i> Historia</a></li>
         <li><a href="#contacto" class="nav-item"><i class="fa-solid fa-envelope"></i> Contacto</a></li>
       </ul>
-      <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <button id="btn-share-app" class="btn btn-sm" style="background: transparent; border: 1px solid var(--color-gold); color: var(--color-gold); padding: 5px 10px; border-radius: 20px; font-size: 0.85rem;" title="Compartir Aplicación">
+          <i class="fa-solid fa-share-nodes"></i> Compartir
+        </button>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -778,7 +783,7 @@
         <img class="footer-logo" id="footer-logo-img" src="logo.jpg" alt="ICPD Logo">
         <h3>Iglesia Cristiana Pueblo de Dios</h3>
         <p>Abreviado como ICPD. San Justo, Buenos Aires.</p>
-        <p style="font-size: 0.85rem; color: var(--color-gold); margin-top: 15px; font-weight: bold;">Versión 1.17</p>
+        <p style="font-size: 0.85rem; color: var(--color-gold); margin-top: 15px; font-weight: bold;">Versión 1.18</p>
       </div>
       <div class="footer-socials">
         <h4>Síguenos en Redes Sociales</h4>
@@ -821,7 +826,7 @@
   <!-- Leaflet JS for Interactive Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=1.17"></script>
+  <script src="app.js?v=1.18"></script>
 </body>
 </html>
 
