@@ -429,14 +429,15 @@ window.currentFilteredSongs = songs;
   songs.forEach((song, index) => {
     const card = document.createElement('div');
     card.className = 'song-card';
-    const isLocalFile = song.embedUrl.startsWith('data:');
+    const safeEmbedUrl = song.embedUrl || '';
+    const isLocalFile = safeEmbedUrl.startsWith('data:');
     
     card.innerHTML = `
       <div class="song-thumb">
         ${isLocalFile 
-          ? `<video src="${song.embedUrl}" style="width:100%;height:100%;object-fit:cover;"></video>
+          ? `<video src="${safeEmbedUrl}" style="width:100%;height:100%;object-fit:cover;"></video>
              <div class="play-overlay" onclick="playSongFromPlaylist(${index})">`
-          : `<img src="https://img.youtube.com/vi/${getYouTubeId(song.embedUrl)}/0.jpg" alt="${song.title}">
+          : `<img src="https://img.youtube.com/vi/${getYouTubeId(safeEmbedUrl)}/0.jpg" alt="${song.title}">
              <div class="play-overlay" onclick="playSongFromPlaylist(${index})">`
         }
           <i class="fa-solid fa-circle-play"></i>
@@ -460,8 +461,9 @@ function renderEbVideos() {
     const card = document.createElement('div');
     card.className = 'song-card eb-video-card';
     
-    const isAudio = vid.type === 'audio' || (vid.embedUrl && (vid.embedUrl.startsWith('data:audio') || vid.embedUrl.endsWith('.mp3')));
-    const isLocalFile = vid.embedUrl.startsWith('data:');
+    const safeEmbedUrl = vid.embedUrl || '';
+    const isAudio = vid.type === 'audio' || (safeEmbedUrl && (safeEmbedUrl.startsWith('data:audio') || safeEmbedUrl.endsWith('.mp3')));
+    const isLocalFile = safeEmbedUrl.startsWith('data:');
     
     let thumbHtml = '';
     if (isAudio) {
@@ -2120,7 +2122,8 @@ window.playSongFromPlaylist = function(index) {
   window.currentSongIndex = index;
   const song = window.currentFilteredSongs[index];
   
-  const isLocalFile = song.embedUrl.startsWith('data:');
+  const safeEmbedUrl = song.embedUrl || '';
+  const isLocalFile = safeEmbedUrl.startsWith('data:');
   const modal = document.getElementById('video-modal');
   const container = modal.querySelector('.video-container');
 
