@@ -331,7 +331,7 @@ function renderSermons(sermonList) {
     }
     if (sermon.videoUrl && sermon.videoUrl !== '#') {
       actionsHtml += `
-          <button class="action-video" onclick="openVideoModal('${sermon.videoUrl}')">
+          <button class="action-video" onclick="openVideoModal('${sermon.videoUrl}', ${idx}, 'sermon')">
             <i class="fa-brands fa-youtube"></i> Video
           </button>`;
     }
@@ -458,7 +458,7 @@ function renderEbVideos() {
       if (isLocalFile) {
         thumbHtml = `
           <video src="${vid.embedUrl}" style="width:100%;height:100%;object-fit:cover;"></video>
-          <div class="play-overlay" onclick="openLocalVideoModal('${vid.embedUrl}')">
+          <div class="play-overlay" onclick="openLocalVideoModal('${vid.embedUrl}', ${idx}, 'eb')">
             <i class="fa-solid fa-circle-play"></i>
           </div>
         `;
@@ -470,7 +470,7 @@ function renderEbVideos() {
                          
         thumbHtml = `
           <img src="${thumbSrc}" alt="${vid.title}">
-          <div class="play-overlay" onclick="openVideoModal('${vid.embedUrl}')">
+          <div class="play-overlay" onclick="openVideoModal('${vid.embedUrl}', ${idx}, 'eb')">
             <i class="fa-solid fa-circle-play"></i>
           </div>
         `;
@@ -2033,14 +2033,39 @@ function fileToBase64(file) {
   });
 }
 
-window.openVideoModal = function(url) {
+window.openVideoModal = function(url, idx = null, type = null) {
   const modal = document.getElementById('video-modal');
-  const iframe = document.getElementById('modal-iframe');
-  if (iframe) {
-    const embedUrl = (typeof convertDriveLinkToEmbed === 'function') ? convertDriveLinkToEmbed(url) : url;
-    iframe.src = embedUrl;
+  const container = modal.querySelector('.video-container');
+  
+  const aiPanel = document.getElementById('ai-panel-container');
+  if (aiPanel) {
+    if (idx !== null && type !== null) {
+      aiPanel.style.display = 'block';
+      if (typeof setupGroqPanel === 'function') setupGroqPanel(idx, type);
+    } else {
+      aiPanel.style.display = 'none';
+    }
   }
-  modal.classList.add('active');
+
+  const ytId = getYouTubeId(url);
+  if (ytId) {
+    container.innerHTML = `<div id="modal-yt-player" style="width:100%; height:100%;"></div>`;
+    modal.classList.add('active');
+    
+    if (isYtApiReady) {
+      ytPlayer = new YT.Player('modal-yt-player', {
+        videoId: ytId,
+        playerVars: { 'autoplay': 1, 'playsinline': 1 }
+      });
+    } else {
+      container.innerHTML = `<iframe id="modal-iframe" src="https://www.youtube.com/embed/${ytId}?autoplay=1&enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      modal.classList.add('active');
+    }
+  } else {
+    const embedUrl = (typeof convertDriveLinkToEmbed === 'function') ? convertDriveLinkToEmbed(url) : url;
+    container.innerHTML = `<iframe id="modal-iframe" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+    modal.classList.add('active');
+  }
 };
 
 // --- YouTube IFrame API para Autoplay de Canciones ---
@@ -2316,5 +2341,194 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Error al guardar: " + error.message);
       }
     });
+    });
   }
 });
+
+// --- Groq AI Integration ---
+const getGroqApiKey = () => {
+  return localStorage.getItem('icpd_groq_api_key') || '';
+};
+
+window.switchAITab = function(tab) {
+  const tabs = document.querySelectorAll('.ai-tab-btn');
+  tabs.forEach(t => { t.classList.remove('active'); t.style.color = '#fff'; t.style.borderBottom = 'none'; });
+  
+  const activeTabBtn = document.querySelector(`.ai-tab-btn[onclick="switchAITab('${tab}')"]`);
+  if (activeTabBtn) {
+    activeTabBtn.classList.add('active');
+    activeTabBtn.style.color = 'var(--color-gold)';
+    activeTabBtn.style.borderBottom = '2px solid var(--color-gold)';
+  }
+  
+  document.getElementById('ai-qna-content').style.display = tab === 'qna' ? 'block' : 'none';
+  document.getElementById('ai-subs-content').style.display = tab === 'subs' ? 'block' : 'none';
+};
+
+window.seekToTime = function(seconds) {
+  if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+    ytPlayer.seekTo(seconds, true);
+    ytPlayer.playVideo();
+  } else {
+    // If iframe was used without API wrapper
+    const iframe = document.getElementById('modal-iframe') || document.getElementById('modal-yt-player');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(JSON.stringify({
+        event: 'command',
+        func: 'seekTo',
+        args: [seconds, true]
+      }), '*');
+      iframe.contentWindow.postMessage(JSON.stringify({
+        event: 'command',
+        func: 'playVideo',
+        args: []
+      }), '*');
+    }
+  }
+};
+
+window.setupGroqPanel = function(idx, type) {
+  const btn = document.getElementById('btn-groq-analyze');
+  const status = document.getElementById('ai-status');
+  const tabs = document.getElementById('ai-content-tabs');
+  const qnaContent = document.getElementById('ai-qna-content');
+  const subsContent = document.getElementById('ai-subs-content');
+  
+  if (!btn || !status || !tabs || !qnaContent || !subsContent) return;
+  
+  btn.style.display = 'block';
+  status.style.display = 'none';
+  tabs.style.display = 'none';
+  qnaContent.style.display = 'none';
+  subsContent.style.display = 'none';
+  
+  btn.onclick = async () => {
+    let audioUrl = '';
+    if (type === 'sermon' && SERMONS[idx]) {
+      audioUrl = SERMONS[idx].audio;
+    } else if (type === 'eb' && CLASES_EB[idx]) {
+      audioUrl = CLASES_EB[idx].embedUrl; // Para clases que sólo subieron audio
+    }
+    
+    if (!audioUrl || audioUrl === '#' || audioUrl.includes('SoundHelix')) {
+       alert("No hay un archivo de audio válido adjunto a este video para analizar. Asegúrate de haber subido el MP3/M4A en el administrador.");
+       return;
+    }
+    
+    if (!audioUrl.startsWith('data:audio') && !audioUrl.startsWith('data:video') && !audioUrl.startsWith('http')) {
+       alert("Formato de audio no compatible para extraer.");
+       return;
+    }
+    
+    btn.style.display = 'none';
+    status.style.display = 'block';
+    status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Obteniendo el audio y transcribiendo con Whisper... esto puede tardar unos minutos según el tamaño.';
+    
+    try {
+      // 1. Fetch audio and convert to blob
+      let audioBlob;
+      try {
+        const res = await fetch(audioUrl);
+        audioBlob = await res.blob();
+      } catch (e) {
+        throw new Error('No se pudo descargar el archivo de audio. Verifica que no haya restricciones de seguridad (CORS). Sube los audios directamente (Archivo) para mayor seguridad.');
+      }
+      
+      // limit check (Groq Whisper limit is 25MB)
+      if (audioBlob.size > 24 * 1024 * 1024) {
+         status.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> El audio es demasiado grande para la IA (>25MB). Sube una versión de menor calidad (mp3 a 64kbps).';
+         return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'audio.mp3');
+      formData.append('model', 'whisper-large-v3');
+      formData.append('response_format', 'verbose_json');
+      
+      const whisperRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+         method: 'POST',
+         headers: {
+            'Authorization': `Bearer ${getGroqApiKey()}`
+         },
+         body: formData
+      });
+      
+      if (!whisperRes.ok) {
+         throw new Error('Error al transcribir (Groq): ' + (await whisperRes.text()));
+      }
+      
+      const whisperData = await whisperRes.json();
+      const transcriptText = whisperData.text || '';
+      
+      if (!transcriptText || transcriptText.trim() === '') {
+         throw new Error('La transcripción devolvió texto vacío.');
+      }
+      
+      // render subtitles
+      let subsHtml = '';
+      if (whisperData.segments) {
+         whisperData.segments.forEach(seg => {
+            const m = Math.floor(seg.start / 60);
+            const s = Math.floor(seg.start % 60);
+            const timeStr = `${m}:${s < 10 ? '0'+s : s}`;
+            subsHtml += `<p><a href="#" onclick="seekToTime(${seg.start}); return false;" style="color:var(--color-gold); text-decoration:none; margin-right:8px; font-weight:bold;">[${timeStr}]</a> ${seg.text}</p>`;
+         });
+      } else {
+         subsHtml = `<p>${transcriptText}</p>`;
+      }
+      subsContent.innerHTML = subsHtml;
+      
+      // 2. Chat API for questionnaire
+      status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generando el cuestionario de estudio con LLaMA 3...';
+      
+      const chatRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+         method: 'POST',
+         headers: {
+            'Authorization': `Bearer ${getGroqApiKey()}`,
+            'Content-Type': 'application/json'
+         },
+         body: JSON.stringify({
+            model: 'llama3-8b-8192',
+            messages: [
+               { role: 'system', content: 'Eres un asistente de estudios bíblicos. Dada una transcripción, genera 3 a 5 preguntas de comprensión importantes. Devuelve SOLO un JSON con este formato exacto: {"preguntas": [{"pregunta": "texto", "respuesta": "texto", "timestamp_hint": 120}]}. Usa timestamp_hint en segundos numéricos basados en el contexto donde se responde la pregunta, o 0 si no sabes.' },
+               { role: 'user', content: `Transcripción: ${transcriptText.substring(0, 50000)}` }
+            ],
+            response_format: { type: 'json_object' }
+         })
+      });
+      
+      if (!chatRes.ok) {
+         throw new Error('Error al generar cuestionario: ' + (await chatRes.text()));
+      }
+      
+      const chatData = await chatRes.json();
+      const qnaResult = JSON.parse(chatData.choices[0].message.content);
+      
+      let qnaHtml = '<ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:15px;">';
+      if (qnaResult && qnaResult.preguntas) {
+        qnaResult.preguntas.forEach((q, i) => {
+           const m = Math.floor(q.timestamp_hint / 60);
+           const s = Math.floor(q.timestamp_hint % 60);
+           const timeStr = `${m}:${s < 10 ? '0'+s : s}`;
+           qnaHtml += `
+              <li style="background:rgba(255,255,255,0.05); padding:15px; border-radius:6px; border-left:3px solid var(--color-gold);">
+                 <strong style="color:var(--color-gold); display:block; margin-bottom:8px; font-size:1rem;">${i+1}. ${q.pregunta}</strong>
+                 <p style="margin:0 0 10px 0; color:#ddd; font-style:italic;">Respuesta: ${q.respuesta}</p>
+                 <button onclick="seekToTime(${q.timestamp_hint})" class="btn btn-sm" style="background:transparent; border:1px solid var(--color-gold); color:var(--color-gold); padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-play"></i> Saltar al video (${timeStr})</button>
+              </li>
+           `;
+        });
+      }
+      qnaHtml += '</ul>';
+      
+      qnaContent.innerHTML = qnaHtml;
+      
+      status.style.display = 'none';
+      tabs.style.display = 'flex';
+      switchAITab('qna');
+      
+    } catch (e) {
+      status.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Ocurrió un error: ${e.message}`;
+    }
+  };
+};

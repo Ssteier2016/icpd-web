@@ -494,9 +494,9 @@ ul {
 
 /* --- Songs Section --- */
 .songs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .song-card {
@@ -504,17 +504,22 @@ ul {
   border-radius: var(--border-radius-md);
   overflow: hidden;
   border: var(--border-glow);
-  transition: var(--transition-smooth);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  display: flex;
+  align-items: center;
+  height: 80px; /* Tamaño compacto */
 }
 
 .song-card:hover {
-  transform: scale(1.02);
-  border-color: rgba(204, 164, 59, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(204, 163, 82, 0.2);
 }
 
 .song-thumb {
   position: relative;
-  height: 160px;
+  width: 140px; /* Ancho fijo para la imagen */
+  height: 100%;
+  flex-shrink: 0;
   background-color: #000;
 }
 
@@ -540,7 +545,7 @@ ul {
 }
 
 .play-overlay i {
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: var(--color-gold);
   transition: var(--transition-smooth);
 }
@@ -551,17 +556,30 @@ ul {
 }
 
 .song-info {
-  padding: 15px;
+  padding: 0 15px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .song-info h3 {
   font-size: 1rem;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+  color: var(--color-gold);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .song-info p {
+  color: var(--color-text-muted);
   font-size: 0.8rem;
-  color: var(--color-text-gray);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* --- Bible School --- */
@@ -1565,9 +1583,18 @@ ul {
 }
 
 @media (max-width: 768px) {
-  .songs-grid, .eb-videos-grid, .library-grid {
+  .eb-videos-grid, .library-grid {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 10px !important;
+  }
+  .songs-grid {
+    gap: 10px;
+  }
+  .song-card {
+    height: 60px; /* Aún más compacto en móviles */
+  }
+  .song-thumbnail {
+    width: 100px; /* Miniatura más angosta */
   }
   .song-card .song-info {
     padding: 8px !important;

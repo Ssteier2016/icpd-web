@@ -259,7 +259,27 @@
         <span style="font-size:0.85rem; color:#fff; font-weight:bold;">Volumen Turbo:</span>
         <input type="range" id="video-volume-booster" min="1" max="10" step="0.5" value="1" style="width:120px; cursor:pointer; accent-color:var(--color-gold);">
         <span id="video-booster-val" style="font-size:0.85rem; color:var(--color-gold); font-weight:bold; min-width:30px;">1x</span>
-        <span style="font-size:0.75rem; color:var(--color-text-muted); margin-left:10px;">(Nota: La amplificación turbo aplica a videos locales; YouTube limita la amplificación externa por iframe)</span>
+        <span style="font-size:0.75rem; color:var(--color-text-muted); margin-left:10px;">(Aplica a videos locales)</span>
+      </div>
+
+      <!-- Groq AI Panel -->
+      <div id="ai-panel-container" style="margin-top: 15px; background: var(--color-bg-dark); border: 1px solid rgba(204,163,82,0.3); border-radius: 8px; overflow: hidden; display: none;">
+        <div style="padding: 10px 15px; background: rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <h4 style="margin: 0; color: var(--color-gold); font-size: 0.9rem;"><i class="fa-solid fa-robot"></i> Asistente de Estudio (Groq AI)</h4>
+          <button id="btn-groq-analyze" class="btn btn-sm" style="background: var(--color-gold); color: #000; padding: 4px 10px; font-size: 0.75rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> Analizar Audio</button>
+        </div>
+        
+        <div id="ai-status" style="padding: 15px; text-align: center; color: var(--color-text-muted); font-size: 0.85rem; display: none;">
+          <i class="fa-solid fa-circle-notch fa-spin"></i> La IA está procesando el audio... esto puede tardar unos minutos.
+        </div>
+        
+        <div id="ai-content-tabs" style="display: none; border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <button class="ai-tab-btn active" onclick="switchAITab('qna')" style="flex:1; padding:10px; background:transparent; border:none; color:var(--color-gold); border-bottom: 2px solid var(--color-gold); cursor:pointer;">Cuestionario</button>
+          <button class="ai-tab-btn" onclick="switchAITab('subs')" style="flex:1; padding:10px; background:transparent; border:none; color:#fff; cursor:pointer;">Subtítulos</button>
+        </div>
+
+        <div id="ai-qna-content" style="display: none; padding: 15px; max-height: 300px; overflow-y: auto; font-size: 0.85rem;"></div>
+        <div id="ai-subs-content" style="display: none; padding: 15px; max-height: 300px; overflow-y: auto; font-size: 0.85rem; line-height: 1.6;"></div>
       </div>
     </div>
   </div>
@@ -328,11 +348,34 @@
           <button class="admin-tab" data-tab="tab-frases"><i class="fa-solid fa-quote-left"></i> Frases</button>
           <button class="admin-tab" data-tab="tab-actividades"><i class="fa-regular fa-calendar-days"></i> Actividades</button>
           <button class="admin-tab" data-tab="tab-hero"><i class="fa-solid fa-home"></i> Inicio</button>
+          <button class="admin-tab" data-tab="tab-settings" id="btn-tab-settings"><i class="fa-solid fa-gear"></i> Ajustes</button>
           <button class="admin-tab" data-tab="tab-edit-list" id="btn-tab-edit-list"><i class="fa-solid fa-pen-to-square"></i> Edición</button>
         </div>
         
         <div style="text-align: center; margin-top: 10px; margin-bottom: 15px; font-size: 0.9rem; color: var(--color-gold);">
           📊 <b id="admin-visits-counter">Total de Visitas: Cargando...</b>
+        </div>
+
+        <!-- TAB SETTINGS -->
+        <div id="tab-settings" class="admin-tab-content">
+          <h4 style="color:var(--color-gold); margin-bottom:12px;"><i class="fa-solid fa-robot"></i> Configuración de IA (Groq)</h4>
+          <p style="font-size:0.85rem; color:#ccc; margin-bottom:15px;">Pega tu API Key de Groq para habilitar el asistente de estudio en los videos.</p>
+          <div class="admin-field">
+            <label>API Key de Groq:</label>
+            <input type="password" id="form-groq-api-key" placeholder="gsk_...">
+          </div>
+          <button type="button" class="btn btn-primary" onclick="guardarGroqKey()" style="width:100%; margin-top:10px;"><i class="fa-solid fa-save"></i> Guardar API Key</button>
+          <script>
+            function guardarGroqKey() {
+              const k = document.getElementById('form-groq-api-key').value;
+              localStorage.setItem('icpd_groq_api_key', k);
+              alert('API Key de Groq guardada en tu navegador.');
+            }
+            document.addEventListener('DOMContentLoaded', () => {
+              const k = localStorage.getItem('icpd_groq_api_key');
+              if (k) document.getElementById('form-groq-api-key').value = k;
+            });
+          </script>
         </div>
 
         <!-- TAB HERO (INICIO) -->
