@@ -223,7 +223,7 @@ function renderLibrary() {
     card.className = 'library-card';
     
     // Default fallback cover if extraction failed
-    const coverUrl = book.cover || 'https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-6/441496924_491059089925395_1730030588669534958_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=a5f93a&_nc_eui2=AeEov33T8vR-VdK5Ww2Y8o9T7iN8E0PZzSvuI3wTQ9nNK8P2zPvz7t_P0eN662u74Z8&_nc_ohc=2W7627Fz0zQAX-vX2Z9&_nc_oc=Adg5Z-lC4f5v9x0b7k5x9_Z9_t8W7k-f4r6r-h5q9w&_nc_ht=scontent.fepa4-1.fna&oh=00_AYBv6n-5sF-mB5S&oe=6691A0FF';
+    const coverUrl = book.cover || 'logo.jpg';
     
     card.innerHTML = `
       <img src="${coverUrl}" class="library-cover" alt="Portada de ${book.title}">
@@ -339,7 +339,7 @@ function renderSermons(sermonList) {
     
     let covers = sermon.cover;
     if (!covers) {
-      covers = ['https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-6/441496924_491059089925395_1730030588669534958_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=a5f93a&_nc_eui2=AeEov33T8vR-VdK5Ww2Y8o9T7iN8E0PZzSvuI3wTQ9nNK8P2zPvz7t_P0eN662u74Z8&_nc_ohc=2W7627Fz0zQAX-vX2Z9&_nc_oc=Adg5Z-lC4f5v9x0b7k5x9_Z9_t8W7k-f4r6r-h5q9w&_nc_ht=scontent.fepa4-1.fna&oh=00_AYBv6n-5sF-mB5S&oe=6691A0FF'];
+      covers = ['logo.jpg'];
     } else if (!Array.isArray(covers)) {
       covers = [covers];
     }
@@ -713,7 +713,7 @@ function initMap() {
   }).addTo(map);
 
   const churchIcon = L.icon({
-    iconUrl: 'https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157',
+    iconUrl: 'logo.jpg',
     iconSize: [40, 40],
     iconAnchor: [20, 40],
     popupAnchor: [0, -40]
@@ -1988,15 +1988,15 @@ function initLightbox() {
 function getDefaultPhotos() {
   return [
     {
-      src: "https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-6/441496924_491059089925395_1730030588669534958_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=a5f93a&_nc_eui2=AeEov33T8vR-VdK5Ww2Y8o9T7iN8E0PZzSvuI3wTQ9nNK8P2zPvz7t_P0eN662u74Z8&_nc_ohc=2W7627Fz0zQAX-vX2Z9&_nc_oc=Adg5Z-lC4f5v9x0b7k5x9_Z9_t8W7k-f4r6r-h5q9w&_nc_ht=scontent.fepa4-1.fna&oh=00_AYBv6n-5sF-mB5S&oe=6691A0FF",
+      src: "logo.jpg",
       caption: "Reunión de Adoración Dominical"
     },
     {
-      src: "https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-6/440941146_491059103258727_7278740593807238322_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=BvgXSpKzjVMQ&_nc_ht=scontent.fepa4-1.fna&oh=00_AYC-NRYiOXh38OOY8QD72RJbA&oe=6691C3E2",
+      src: "logo.jpg",
       caption: "Identidad Visual Oficial ICPD"
     },
     {
-      src: "https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-6/438290230_482930230738281_8928372983792019372_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=5f2048&_nc_eui2=AeFt8oZ8Q9qZ_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=2W7627Fz0zQAX-vX2Z9&_nc_ht=scontent.fepa4-1.fna&oh=00_AYBv6n-5sF-mB5S&oe=6691C3E2",
+      src: "logo.jpg",
       caption: "Comunidad de Fe en San Justo"
     }
   ];
@@ -2240,7 +2240,7 @@ window.renderHero = function() {
   const subtitle = document.getElementById('hero-subtitle');
   const buttonsContainer = document.getElementById('hero-buttons-container');
 
-  const defaultLogo = "https://scontent.fepa4-1.fna.fbcdn.net/v/t39.30808-1/440941146_491059103258727_7278740593807238322_n.jpg?stp=dst-jpg_tt6&cstp=mx500x500&ctp=s200x200&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&_nc_eui2=AeF26fTj2jGY_whG0ffTKhDEbYpOYrsUMNJtik5iuxQw0oxuZ4_njXy_ngVDYXxpHdQ&_nc_ohc=Si-kTh1XnAwQ7kNvwEc5nFD&_nc_oc=Adr63oSDKxYdG2otv6cuPk7yB2qFowEISmHUivATfqP1jaVTxaEaAwtha13BTO2a2fRe5QYnC4iJpCsVA4z-dMEI&_nc_zt=24&_nc_ht=scontent.fepa4-1.fna&_nc_gid=70c8xX7-bhKcDWRZAqsOng&_nc_ss=7b2a8&oh=00_AQCzRQVkhfr_yio2W6nciTQdFQH6DC-3CSDoC181svmE-w&oe=6A5B7157";
+  const defaultLogo = "logo.jpg";
   const displayLogo = data.logo || defaultLogo;
 
   if (logoImg) logoImg.src = displayLogo;
@@ -2559,3 +2559,4 @@ window.setupGroqPanel = function(idx, type) {
     }
   };
 };
+
