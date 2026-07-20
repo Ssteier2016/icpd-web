@@ -2341,7 +2341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Error al guardar: " + error.message);
       }
     });
-    });
   }
 });
 
