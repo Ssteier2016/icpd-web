@@ -334,7 +334,7 @@ function renderSermons(sermonList) {
     return;
   }
 
-  sermonList.forEach(sermon => {
+  sermonList.forEach((sermon, idx) => {
     const formattedDate = formatDateString(sermon.date);
     const card = document.createElement('div');
     card.className = 'sermon-card';
@@ -465,7 +465,7 @@ function renderEbVideos() {
   if (!grid) return;
   grid.innerHTML = '';
   const ebVideos = JSON.parse(localStorage.getItem('icpd_eb_videos')) || EB_VIDEOS;
-  ebVideos.forEach(vid => {
+  ebVideos.forEach((vid, idx) => {
     const card = document.createElement('div');
     card.className = 'song-card eb-video-card';
     
