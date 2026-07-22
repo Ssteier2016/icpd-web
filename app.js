@@ -379,7 +379,7 @@ function renderSermons(sermonList) {
     }
     
     card.innerHTML = `
-      <div class="sermon-header-img has-carousel" data-covers="${coversJson}" onclick="openLightboxFromSermon(this, '${sermon.title}')" style="height: 160px; position: relative; cursor: pointer; overflow: hidden;" title="Haz clic para ver la carátula completa">
+      <div class="sermon-header-img has-carousel" data-covers="${coversJson}" onclick="openLightboxFromSermon(this, '${sermon.title}')" style="position: relative; cursor: pointer; overflow: hidden;" title="Haz clic para ver la carátula completa">
         ${slidesHtml}
         <div style="position: absolute; top: 10px; right: 10px; color: rgba(255,255,255,0.8); font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); z-index: 10;"><i class="fa-solid fa-expand"></i></div>
         <span class="sermon-date-tag">${formattedDate}</span>
