@@ -22,15 +22,23 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// Función para evitar crashes si Firebase devuelve objetos en lugar de arrays o arrays con nulls
+function normalizeArray(data) {
+  if (!data) return [];
+  if (Array.isArray(data)) return data.filter(item => item !== null && item !== undefined);
+  if (typeof data === 'object') return Object.values(data).filter(item => item !== null && item !== undefined);
+  return [];
+}
+
 // Escuchar cambios en tiempo real desde Firebase
-db.ref('icpd_sermons').on('value', snap => { SERMONS = snap.val() || []; renderSermons(SERMONS); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
-db.ref('icpd_materials').on('value', snap => { MATERIALS = snap.val() || []; if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
-db.ref('icpd_songs').on('value', snap => { SONGS = snap.val() || []; renderSongs(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
-db.ref('icpd_eb_videos').on('value', snap => { EB_VIDEOS = snap.val() || []; renderEbVideos(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
-db.ref('icpd_library').on('value', snap => { LIBRARY = snap.val() || []; renderLibrary(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
-db.ref('icpd_frases').on('value', snap => { FRASES = snap.val() || []; renderFraseRotativa(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); if (typeof renderAdminFrasesGrid === 'function') renderAdminFrasesGrid(); });
-db.ref('icpd_photos').on('value', snap => { PHOTOS = snap.val() || []; renderGallery(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
-db.ref('icpd_actividades').on('value', snap => { ACTIVIDADES = snap.val() || []; if (typeof renderActividades === 'function') renderActividades(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_sermons').on('value', snap => { SERMONS = normalizeArray(snap.val()); renderSermons(SERMONS); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_materials').on('value', snap => { MATERIALS = normalizeArray(snap.val()); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_songs').on('value', snap => { SONGS = normalizeArray(snap.val()); renderSongs(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_eb_videos').on('value', snap => { EB_VIDEOS = normalizeArray(snap.val()); renderEbVideos(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_library').on('value', snap => { LIBRARY = normalizeArray(snap.val()); renderLibrary(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_frases').on('value', snap => { FRASES = normalizeArray(snap.val()); renderFraseRotativa(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); if (typeof renderAdminFrasesGrid === 'function') renderAdminFrasesGrid(); });
+db.ref('icpd_photos').on('value', snap => { PHOTOS = normalizeArray(snap.val()); renderGallery(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_actividades').on('value', snap => { ACTIVIDADES = normalizeArray(snap.val()); if (typeof renderActividades === 'function') renderActividades(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
 db.ref('icpd_hero').on('value', snap => { HERO_DATA = snap.val() || null; if (typeof renderHero === 'function') renderHero(); });
 db.ref('icpd_visits').on('value', snap => {
   TOTAL_VISITS = snap.val() || 0;
