@@ -79,6 +79,30 @@
         <div id="hero-frases-container" class="animate-fade-in">
           <!-- Dynamically filled by app.js -->
         </div>
+
+        <!-- Contenedor En Vivo (Reemplaza a frases cuando hay transmisión activa) -->
+        <div id="hero-live-container" class="animate-fade-in" style="display: none; margin-top: 25px; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; background: rgba(0,0,0,0.65); border: 2px solid #ef4444; border-radius: 12px; padding: 20px; box-shadow: 0 0 35px rgba(239, 68, 68, 0.45); text-align: center;">
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: #ef4444; color: #fff; font-weight: bold; padding: 6px 16px; border-radius: 20px; font-size: 0.95rem; margin-bottom: 15px; letter-spacing: 1px;">
+            <span style="width: 10px; height: 10px; background: #fff; border-radius: 50%; display: inline-block;"></span> TRANSMISIÓN EN VIVO
+          </div>
+          <h3 id="hero-live-title" style="color: #fff; font-size: 1.3rem; margin-bottom: 15px; font-family: var(--font-title);">Señal Directa de ICPD</h3>
+          <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000;">
+            <iframe id="hero-live-iframe" src="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historial de Transmisiones en Vivo (Oculto si no hay videos) -->
+    <section id="historial-en-vivo-section" class="section-padding alt-bg" style="display: none;">
+      <div class="container">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-tower-broadcast" style="color: #ef4444;"></i> Historial de En Vivos</h2>
+          <p>Revive las transmisiones en directo y reuniones pasadas del canal de ICPD</p>
+        </div>
+        <div class="sermons-grid" id="live-history-grid">
+          <!-- Dynamically filled by app.js -->
+        </div>
       </div>
     </section>
 
@@ -353,12 +377,40 @@
           <button class="admin-tab" data-tab="tab-frases"><i class="fa-solid fa-quote-left"></i> Frases</button>
           <button class="admin-tab" data-tab="tab-actividades"><i class="fa-regular fa-calendar-days"></i> Actividades</button>
           <button class="admin-tab" data-tab="tab-hero"><i class="fa-solid fa-home"></i> Inicio</button>
+          <button class="admin-tab" data-tab="tab-live" style="border-color: #ef4444; color: #ef4444;"><i class="fa-solid fa-tower-broadcast"></i> En Vivo</button>
           <button class="admin-tab" data-tab="tab-settings" id="btn-tab-settings"><i class="fa-solid fa-gear"></i> Ajustes</button>
           <button class="admin-tab" data-tab="tab-edit-list" id="btn-tab-edit-list"><i class="fa-solid fa-pen-to-square"></i> Edición</button>
         </div>
         
         <div style="text-align: center; margin-top: 10px; margin-bottom: 15px; font-size: 0.9rem; color: var(--color-gold);">
           📊 <b id="admin-visits-counter">Total de Visitas: Cargando...</b>
+        </div>
+
+        <!-- TAB EN VIVO (STREAMING) -->
+        <div id="tab-live" class="admin-tab-content">
+          <h4 style="color: #ef4444; margin-bottom: 12px;"><i class="fa-solid fa-tower-broadcast"></i> Control de Transmisión en Vivo</h4>
+          <p style="font-size: 0.85rem; color: #ccc; margin-bottom: 15px;">
+            Al activar el Modo En Vivo, las Frases Rotativas se ocultarán y toda la iglesia verá el reproductor del video en directo en la página principal.
+          </p>
+          <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+            <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-weight: bold; color: #fff; font-size: 1rem;">
+              <input type="checkbox" id="admin-live-status-toggle" style="width: 22px; height: 22px; accent-color: #ef4444; cursor: pointer;">
+              🔴 ACTIVAR TRANSMISIÓN EN VIVO AHORA
+            </label>
+          </div>
+          <div class="admin-field">
+            <label>Título del Servicio o Reunión:</label>
+            <input type="text" id="admin-live-title" placeholder="Ej: Servicio General de Domingo - ICPD">
+          </div>
+          <div class="admin-field">
+            <label>URL o ID del Video en Vivo de YouTube:</label>
+            <input type="text" id="admin-live-url" placeholder="Ej: https://www.youtube.com/watch?v=... o dejar vacío para automático">
+            <small style="color: var(--color-text-muted); font-size: 0.75rem;">Si lo dejas en blanco, cargará la señal en vivo por defecto del canal de ICPD.</small>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+            <button type="button" class="btn" id="btn-save-live-status" style="flex: 1; background: #ef4444; color: #fff; font-weight: bold; padding: 12px;"><i class="fa-solid fa-tower-broadcast"></i> Guardar y Emitir</button>
+            <button type="button" class="btn" id="btn-end-live-stream" style="flex: 1; background: rgba(255,255,255,0.1); color: #fff; padding: 12px;" title="Apaga el en vivo y mueve el video al Historial"><i class="fa-solid fa-stop"></i> Finalizar y Guardar en Historial</button>
+          </div>
         </div>
 
         <!-- TAB SETTINGS -->
@@ -597,6 +649,7 @@
               <option value="songs">🎵 Canciones / Alabanzas</option>
               <option value="eb">📚 Clases EB (Audio/Video)</option>
               <option value="materials">📁 Materiales de Estudio</option>
+              <option value="live_history">🔴 Historial de En Vivos</option>
             </select>
           </div>
           <div id="admin-edit-items-container" style="display:flex; flex-direction:column; gap:10px; max-height:40vh; overflow-y:auto; padding-right:5px; margin-top:10px;">
@@ -783,7 +836,7 @@
         <img class="footer-logo" id="footer-logo-img" src="logo.jpg" alt="ICPD Logo">
         <h3>Iglesia Cristiana Pueblo de Dios</h3>
         <p>Abreviado como ICPD. San Justo, Buenos Aires.</p>
-        <p style="font-size: 0.85rem; color: var(--color-gold); margin-top: 15px; font-weight: bold;">Versión 1.25</p>
+        <p style="font-size: 0.85rem; color: var(--color-gold); margin-top: 15px; font-weight: bold;">Versión 1.26</p>
       </div>
       <div class="footer-socials">
         <h4>Síguenos en Redes Sociales</h4>
@@ -826,7 +879,7 @@
   <!-- Leaflet JS for Interactive Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=1.25"></script>
+  <script src="app.js?v=1.26"></script>
 </body>
 </html>
 

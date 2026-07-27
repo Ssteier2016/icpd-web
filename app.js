@@ -8,6 +8,8 @@ let PHOTOS = [];
 let ACTIVIDADES = [];
 let HERO_DATA = null;
 let TOTAL_VISITS = 0;
+let LIVE_STATUS = JSON.parse(localStorage.getItem('icpd_live_status')) || { isLive: false };
+let LIVE_HISTORY = JSON.parse(localStorage.getItem('icpd_live_history')) || [];
 
 // --- Firebase Initialization ---
 const firebaseConfig = {
@@ -44,6 +46,21 @@ db.ref('icpd_visits').on('value', snap => {
   TOTAL_VISITS = snap.val() || 0;
   const counterEl = document.getElementById('admin-visits-counter');
   if (counterEl) counterEl.textContent = `Total de Visitas: ${TOTAL_VISITS}`;
+});
+db.ref('icpd_live_status').on('value', snap => {
+  if (snap.val()) {
+    LIVE_STATUS = snap.val();
+    localStorage.setItem('icpd_live_status', JSON.stringify(LIVE_STATUS));
+  }
+  if (typeof renderLiveStatus === 'function') renderLiveStatus();
+});
+db.ref('icpd_live_history').on('value', snap => {
+  LIVE_HISTORY = normalizeArray(snap.val());
+  if (LIVE_HISTORY.length > 0) {
+    localStorage.setItem('icpd_live_history', JSON.stringify(LIVE_HISTORY));
+  }
+  if (typeof renderLiveHistory === 'function') renderLiveHistory();
+  if (typeof renderAdminEditList === 'function') renderAdminEditList();
 });
 
 // Registrar visita única por sesión
@@ -180,6 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initModals();
   renderGallery();
   initLightbox();
+  if (typeof renderLiveStatus === 'function') renderLiveStatus();
+  if (typeof renderLiveHistory === 'function') renderLiveHistory();
+  if (typeof initAdminLiveControls === 'function') initAdminLiveControls();
 });
 
 // --- Navigation Scroll Effect & Mobile Menu ---
@@ -1433,6 +1453,8 @@ function initModals() {
       items = EB_VIDEOS;
     } else if (type === 'materials') {
       items = MATERIALS;
+    } else if (type === 'live_history') {
+      items = LIVE_HISTORY;
     }
 
     if (items.length === 0) {
@@ -1488,6 +1510,10 @@ function initModals() {
           } else if (type === 'materials') {
             MATERIALS.splice(idx, 1);
             db.ref('icpd_materials').set(MATERIALS);
+          } else if (type === 'live_history') {
+            LIVE_HISTORY.splice(idx, 1);
+            db.ref('icpd_live_history').set(LIVE_HISTORY);
+            if (typeof renderLiveHistory === 'function') renderLiveHistory();
           }
           renderAdminEditList();
           showSuccess();
@@ -1580,6 +1606,10 @@ function initModals() {
             } else if (type === 'materials') {
               MATERIALS[idx].title = newTitle;
               db.ref('icpd_materials').set(MATERIALS);
+            } else if (type === 'live_history') {
+              LIVE_HISTORY[idx].title = newTitle;
+              db.ref('icpd_live_history').set(LIVE_HISTORY);
+              if (typeof renderLiveHistory === 'function') renderLiveHistory();
             }
             renderAdminEditList();
             showSuccess();
@@ -2570,4 +2600,163 @@ window.setupGroqPanel = function(idx, type) {
     }
   };
 };
+
+// --- LIVE STREAMING MODULE (TRANSMISIÓN EN VIVO & HISTORIAL) ---
+function renderLiveStatus() {
+  const frasesContainer = document.getElementById('hero-frases-container');
+  const liveContainer = document.getElementById('hero-live-container');
+  const liveTitle = document.getElementById('hero-live-title');
+  const liveIframe = document.getElementById('hero-live-iframe');
+
+  if (!frasesContainer || !liveContainer) return;
+
+  if (LIVE_STATUS && LIVE_STATUS.isLive) {
+    frasesContainer.style.display = 'none';
+    liveContainer.style.display = 'block';
+    if (liveTitle) liveTitle.textContent = LIVE_STATUS.title || "Señal Directa de ICPD";
+    
+    let url = LIVE_STATUS.url || "https://www.youtube.com/embed/live_stream?channel=UCBztIhqNR1GLxXG6mRUffrQ&autoplay=1";
+    if (url.includes('watch?v=')) {
+      const vid = url.split('watch?v=')[1].split('&')[0];
+      url = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+    } else if (url.includes('youtu.be/')) {
+      const vid = url.split('youtu.be/')[1].split('?')[0];
+      url = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+    } else if (!url.includes('embed')) {
+      url = "https://www.youtube.com/embed/live_stream?channel=UCBztIhqNR1GLxXG6mRUffrQ&autoplay=1";
+    }
+
+    if (liveIframe && liveIframe.src !== url) {
+      liveIframe.src = url;
+    }
+  } else {
+    frasesContainer.style.display = 'block';
+    liveContainer.style.display = 'none';
+    if (liveIframe && liveIframe.src !== "") {
+      liveIframe.src = "";
+    }
+  }
+
+  // Sincronizar campos del admin panel si están visibles
+  const toggleInput = document.getElementById('admin-live-status-toggle');
+  const titleInput = document.getElementById('admin-live-title');
+  const urlInput = document.getElementById('admin-live-url');
+  if (toggleInput && document.activeElement !== toggleInput) {
+    toggleInput.checked = LIVE_STATUS && LIVE_STATUS.isLive ? true : false;
+  }
+  if (titleInput && document.activeElement !== titleInput && LIVE_STATUS) {
+    titleInput.value = LIVE_STATUS.title || '';
+  }
+  if (urlInput && document.activeElement !== urlInput && LIVE_STATUS) {
+    urlInput.value = LIVE_STATUS.url || '';
+  }
+}
+
+function renderLiveHistory() {
+  const section = document.getElementById('historial-en-vivo-section');
+  const grid = document.getElementById('live-history-grid');
+  if (!section || !grid) return;
+
+  if (!LIVE_HISTORY || LIVE_HISTORY.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  grid.innerHTML = '';
+
+  // Ordenar de más reciente a más antiguo
+  const sorted = [...LIVE_HISTORY].sort((a, b) => (b.id || 0) - (a.id || 0));
+
+  sorted.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'sermon-card animate-fade-in';
+    
+    let thumb = 'logo.jpg';
+    let embedUrl = item.url || "https://www.youtube.com/embed/live_stream?channel=UCBztIhqNR1GLxXG6mRUffrQ";
+    if (embedUrl.includes('embed/')) {
+      const vid = embedUrl.split('embed/')[1].split('?')[0];
+      if (vid && vid !== 'live_stream') thumb = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+    } else if (embedUrl.includes('watch?v=')) {
+      const vid = embedUrl.split('watch?v=')[1].split('&')[0];
+      thumb = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+      embedUrl = `https://www.youtube.com/embed/${vid}`;
+    } else if (embedUrl.includes('youtu.be/')) {
+      const vid = embedUrl.split('youtu.be/')[1].split('?')[0];
+      thumb = `https://img.youtube.com/vi/${vid}/mqdefault.jpg`;
+      embedUrl = `https://www.youtube.com/embed/${vid}`;
+    }
+
+    card.innerHTML = `
+      <img src="${thumb}" alt="${item.title}" class="sermon-header-img" onerror="this.src='logo.jpg'">
+      <div class="sermon-info">
+        <span class="sermon-date"><i class="fa-solid fa-calendar"></i> ${item.date || 'Reciente'}</span>
+        <h3 class="sermon-title" style="color: #fff; margin: 8px 0;">${item.title || 'Transmisión en Vivo'}</h3>
+        <p class="sermon-preacher" style="color: var(--color-gold);"><i class="fa-solid fa-church"></i> ICPD En Vivo</p>
+        <div style="margin-top: 15px;">
+          <button class="btn btn-sm btn-primary" onclick="openVideoModal('${embedUrl}')" style="width: 100%;"><i class="fa-solid fa-play"></i> Ver Grabación</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function initAdminLiveControls() {
+  const saveBtn = document.getElementById('btn-save-live-status');
+  const endBtn = document.getElementById('btn-end-live-stream');
+  const toggleInput = document.getElementById('admin-live-status-toggle');
+  const titleInput = document.getElementById('admin-live-title');
+  const urlInput = document.getElementById('admin-live-url');
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const isLive = toggleInput ? toggleInput.checked : false;
+      const title = titleInput ? titleInput.value.trim() : '';
+      const url = urlInput ? urlInput.value.trim() : '';
+
+      const newStatus = { isLive, title, url, updatedAt: Date.now() };
+      LIVE_STATUS = newStatus;
+      localStorage.setItem('icpd_live_status', JSON.stringify(newStatus));
+      db.ref('icpd_live_status').set(newStatus);
+      
+      renderLiveStatus();
+      if (typeof showSuccess === 'function') showSuccess();
+      alert(isLive ? "🔴 Transmisión EN VIVO activada y visible en portada para toda la iglesia." : "⬛ Modo En Vivo desactivado.");
+    });
+  }
+
+  if (endBtn) {
+    endBtn.addEventListener('click', () => {
+      if (!confirm("¿Estás seguro de finalizar la transmisión en vivo y archivar el video en el Historial de En Vivos?")) return;
+
+      const title = (titleInput && titleInput.value.trim()) || (LIVE_STATUS && LIVE_STATUS.title) || "Servicio General en Vivo";
+      let url = (urlInput && urlInput.value.trim()) || (LIVE_STATUS && LIVE_STATUS.url) || "https://www.youtube.com/embed/live_stream?channel=UCBztIhqNR1GLxXG6mRUffrQ";
+      
+      const newStatus = { isLive: false, title: '', url: '', updatedAt: Date.now() };
+      LIVE_STATUS = newStatus;
+      localStorage.setItem('icpd_live_status', JSON.stringify(newStatus));
+      db.ref('icpd_live_status').set(newStatus);
+      if (toggleInput) toggleInput.checked = false;
+      if (titleInput) titleInput.value = '';
+      if (urlInput) urlInput.value = '';
+      renderLiveStatus();
+
+      const historyItem = {
+        id: Date.now(),
+        title: title,
+        url: url,
+        date: new Date().toLocaleDateString('es-AR')
+      };
+      LIVE_HISTORY.push(historyItem);
+      localStorage.setItem('icpd_live_history', JSON.stringify(LIVE_HISTORY));
+      db.ref('icpd_live_history').set(LIVE_HISTORY);
+      
+      renderLiveHistory();
+      if (typeof showSuccess === 'function') showSuccess();
+      alert("✅ Transmisión finalizada. El video se ha guardado en la sección pública 'Historial de En Vivos'.");
+    });
+  }
+}
+
 
