@@ -370,8 +370,8 @@ ul {
 
 /* --- Cards --- */
 .sermons-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 15px;
 }
 
@@ -1615,6 +1615,9 @@ ul {
     width: 35px !important;
     height: 35px !important;
     font-size: 0.8rem !important;
+  }
+  .sermons-grid {
+    grid-template-columns: 1fr !important;
   }
   .sermon-card {
     flex-direction: column;
