@@ -499,8 +499,8 @@ ul {
 
 /* --- Songs Section --- */
 .songs-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 15px;
 }
 
@@ -1593,6 +1593,7 @@ ul {
     gap: 10px !important;
   }
   .songs-grid {
+    grid-template-columns: 1fr !important;
     gap: 10px;
   }
   .song-card {
@@ -1625,5 +1626,88 @@ ul {
   .sermon-header-img {
     width: 100%;
     height: 140px;
+  }
+}
+
+@media (min-width: 993px) {
+  body {
+    padding-left: 260px !important;
+  }
+  .navbar {
+    width: 260px !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: none !important;
+    background-color: rgba(11, 15, 23, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    padding: 25px 20px !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .navbar.scrolled {
+    padding: 25px 20px !important;
+    box-shadow: 5px 0 25px rgba(0,0,0,0.5) !important;
+  }
+  .nav-container {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    height: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  .logo-link {
+    width: 100% !important;
+    padding-bottom: 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin-bottom: 15px !important;
+  }
+  .nav-menu {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 6px !important;
+    overflow-y: auto !important;
+    flex-grow: 1 !important;
+    padding-right: 5px !important;
+  }
+  .nav-item {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
+    justify-content: flex-start !important;
+  }
+  .nav-item:hover, .nav-item.active {
+    background-color: rgba(204, 164, 59, 0.15) !important;
+    color: var(--color-gold) !important;
+    border-bottom: none !important;
+    border-left: 4px solid var(--color-gold) !important;
+    border-radius: 4px 8px 8px 4px !important;
+  }
+  .nav-actions {
+    width: 100% !important;
+    padding-top: 15px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    margin-top: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  #btn-share-app {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 10px !important;
+  }
+  .audio-player-bar {
+    left: 260px !important;
+    width: calc(100% - 260px) !important;
+  }
+  .hero-section {
+    padding-top: 0 !important;
   }
 }
