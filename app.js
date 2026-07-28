@@ -1,4 +1,5 @@
 let SERMONS = [];
+let PREDICAS = [];
 let MATERIALS = [];
 let SONGS = [];
 let EB_VIDEOS = [];
@@ -34,6 +35,7 @@ function normalizeArray(data) {
 
 // Escuchar cambios en tiempo real desde Firebase
 db.ref('icpd_sermons').on('value', snap => { SERMONS = normalizeArray(snap.val()); renderSermons(SERMONS); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
+db.ref('icpd_predicas').on('value', snap => { PREDICAS = normalizeArray(snap.val()); if (typeof renderPredicas === 'function') renderPredicas(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
 db.ref('icpd_materials').on('value', snap => { MATERIALS = normalizeArray(snap.val()); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
 db.ref('icpd_songs').on('value', snap => { SONGS = normalizeArray(snap.val()); renderSongs(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
 db.ref('icpd_eb_videos').on('value', snap => { EB_VIDEOS = normalizeArray(snap.val()); renderEbVideos(); if (typeof renderAdminEditList === 'function') renderAdminEditList(); });
@@ -188,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap();
   renderFraseRotativa();
   renderSermons(SERMONS);
+  if (typeof renderPredicas === 'function') renderPredicas();
   renderSongs();
   renderLibrary();
   renderEbVideos();
@@ -1455,6 +1458,8 @@ function initModals() {
       items = MATERIALS;
     } else if (type === 'live_history') {
       items = LIVE_HISTORY;
+    } else if (type === 'predicas') {
+      items = PREDICAS;
     }
 
     if (items.length === 0) {
@@ -1514,6 +1519,9 @@ function initModals() {
             LIVE_HISTORY.splice(idx, 1);
             db.ref('icpd_live_history').set(LIVE_HISTORY);
             if (typeof renderLiveHistory === 'function') renderLiveHistory();
+          } else if (type === 'predicas') {
+            PREDICAS.splice(idx, 1);
+            db.ref('icpd_predicas').set(PREDICAS);
           }
           renderAdminEditList();
           showSuccess();
@@ -1610,6 +1618,9 @@ function initModals() {
               LIVE_HISTORY[idx].title = newTitle;
               db.ref('icpd_live_history').set(LIVE_HISTORY);
               if (typeof renderLiveHistory === 'function') renderLiveHistory();
+            } else if (type === 'predicas') {
+              PREDICAS[idx].title = newTitle;
+              db.ref('icpd_predicas').set(PREDICAS);
             }
             renderAdminEditList();
             showSuccess();
@@ -2758,5 +2769,99 @@ function initAdminLiveControls() {
     });
   }
 }
+
+// --- PRÉDICAS DEL EVANGELIO MODULE ---
+function renderPredicas() {
+  const container = document.getElementById('predicas-list-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (PREDICAS.length === 0) {
+    container.innerHTML = '<p style="text-align:center; color:var(--color-text-muted);">Próximamente nuevas prédicas.</p>';
+    return;
+  }
+
+  // Ordenar para mostrar lo más reciente arriba (último subido)
+  const sortedPredicas = [...PREDICAS].reverse();
+
+  sortedPredicas.forEach((p, index) => {
+    const row = document.createElement('div');
+    row.className = 'spotify-row';
+    
+    const audioUrl = p.audioUrl || '';
+    
+    row.innerHTML = `
+      <div class="spotify-col-play">
+        <button class="spotify-btn-play" onclick="playAudio('${audioUrl}', '${p.title}', '${p.speaker}')" title="Reproducir audio">
+          <i class="fa-solid fa-play"></i>
+        </button>
+      </div>
+      <div class="spotify-col-info">
+        <h4 class="spotify-title">${p.title}</h4>
+        <span class="spotify-speaker">${p.speaker} ${p.date ? '• ' + p.date : ''}</span>
+      </div>
+      <div class="spotify-col-share">
+        <button class="spotify-btn-share" onclick="sharePredica('${p.title}', '${p.speaker}')" title="Compartir Prédica">
+          <i class="fa-solid fa-share-nodes"></i> <span>Compartir</span>
+        </button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function sharePredica(title, speaker) {
+  const shareData = {
+    title: `Prédica: ${title}`,
+    text: `Escucha esta prédica de salvación: "${title}" por ${speaker} en la web de ICPD.`,
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData)
+      .then(() => console.log('Prédica compartida con éxito'))
+      .catch((error) => console.log('Error compartiendo:', error));
+  } else {
+    // Fallback: copy to clipboard
+    navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`).then(() => {
+      alert("Enlace copiado al portapapeles. ¡Listo para compartir en redes sociales!");
+    });
+  }
+}
+
+// Hook Form Submit para Predicas
+document.addEventListener('DOMContentLoaded', () => {
+  const formPredicas = document.getElementById('form-predicas');
+  if (formPredicas) {
+    formPredicas.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!isFirebaseConfigured()) return;
+      
+      showLoading();
+      try {
+        const title = document.getElementById('form-predicas-title').value.trim();
+        const speaker = document.getElementById('form-predicas-speaker').value.trim();
+        const date = document.getElementById('form-predicas-date').value.trim();
+        let audioUrl = document.getElementById('form-predicas-audio-url').value.trim();
+        const audioFile = document.getElementById('form-predicas-audio-file').files[0];
+
+        if (audioFile) {
+          audioUrl = await uploadFile(audioFile, 'audios');
+        }
+
+        const nuevaPredica = { title, speaker, date, audioUrl };
+        PREDICAS.push(nuevaPredica);
+        await db.ref('icpd_predicas').set(PREDICAS);
+
+        formPredicas.reset();
+        showSuccess();
+      } catch (error) {
+        hideLoading();
+        alert("Error al subir prédica: " + error.message);
+      }
+    });
+  }
+});
+
 
 

@@ -180,6 +180,19 @@
       </div>
     </section>
 
+    <!-- Predicas del Evangelio Section -->
+    <section id="predicas-evangelio" class="section-padding">
+      <div class="container">
+        <div class="section-header">
+          <h2>Prédicas del Evangelio</h2>
+          <p>Escucha las prédicas de salvación, con la opción de compartirlas fácilmente</p>
+        </div>
+        <div class="spotify-list" id="predicas-list-container">
+          <!-- Dynamically filled by app.js -->
+        </div>
+      </div>
+    </section>
+
     <!-- Activities / Agenda Section -->
     <section id="actividades" class="section-padding alt-bg">
       <div class="container">
@@ -373,6 +386,7 @@
           <button class="admin-tab active" data-tab="tab-sermons"><i class="fa-solid fa-book-open"></i> Sermón</button>
           <button class="admin-tab" data-tab="tab-photo"><i class="fa-solid fa-image"></i> Foto</button>
           <button class="admin-tab" data-tab="tab-clases"><i class="fa-solid fa-person-chalkboard"></i> Clases (Audio/Video)</button>
+          <button class="admin-tab" data-tab="tab-predicas"><i class="fa-solid fa-headphones"></i> Prédicas</button>
           <button class="admin-tab" data-tab="tab-library"><i class="fa-solid fa-book"></i> Libro</button>
           <button class="admin-tab" data-tab="tab-frases"><i class="fa-solid fa-quote-left"></i> Frases</button>
           <button class="admin-tab" data-tab="tab-actividades"><i class="fa-regular fa-calendar-days"></i> Actividades</button>
@@ -555,6 +569,32 @@
           </form>
         </div>
 
+        <!-- TAB PRÉDICAS DEL EVANGELIO -->
+        <div id="tab-predicas" class="admin-tab-content">
+          <h4 style="color:var(--color-gold); margin-bottom: 12px;"><i class="fa-solid fa-headphones"></i> Agregar Prédica del Evangelio</h4>
+          <form id="form-predicas" class="admin-form">
+            <div class="admin-field">
+              <label>Título de la Prédica:</label>
+              <input type="text" id="form-predicas-title" placeholder="Ej: La Salvación" required>
+            </div>
+            <div class="admin-field">
+              <label>Predicador:</label>
+              <input type="text" id="form-predicas-speaker" placeholder="Ej: Pastor Sergio Hamdan" required>
+            </div>
+            <div class="admin-field">
+              <label>Fecha (Opcional):</label>
+              <input type="text" id="form-predicas-date" placeholder="Ej: Domingo 15 de Octubre">
+            </div>
+            <div class="admin-field" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+              <h4 style="color:var(--color-gold); margin-bottom: 10px;">Audio de la Prédica</h4>
+              <label>Archivo MP3/M4A o URL:</label>
+              <input type="text" id="form-predicas-audio-url" placeholder="URL de audio (si ya está subido)...">
+              <input type="file" id="form-predicas-audio-file" accept="audio/*,video/mp4,video/mpeg,.mpeg,.mp3,.ogg,.wav,.m4a,.opus,.aac" class="admin-file-input">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-headphones"></i> Subir Prédica</button>
+          </form>
+        </div>
+
         <!-- TAB LIBRARY -->
         <div id="tab-library" class="admin-tab-content">
           <form id="library-upload-form">
@@ -642,6 +682,7 @@
             <label>Selecciona el tipo de recurso:</label>
             <select id="edit-resource-type" style="width:100%; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff; margin-bottom:15px;">
               <option value="sermons">📖 Sermones dominicales</option>
+              <option value="predicas">🎧 Prédicas del Evangelio</option>
               <option value="actividades">📅 Agenda / Actividades</option>
               <option value="frases">💬 Frases Rotativas</option>
               <option value="library">📚 Biblioteca (Libros)</option>

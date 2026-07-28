@@ -1737,3 +1737,104 @@ ul {
     padding-top: 0 !important;
   }
 }
+
+/* --- Spotify Style List (Predicas) --- */
+.spotify-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+.spotify-row {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-card);
+  padding: 12px 20px;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-smooth);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.spotify-row:hover {
+  background: var(--color-bg-card-alt);
+  border-color: rgba(204, 164, 59, 0.3);
+  transform: translateY(-2px);
+}
+.spotify-col-play {
+  margin-right: 20px;
+}
+.spotify-btn-play {
+  background: var(--color-primary-light);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+.spotify-btn-play:hover {
+  background: var(--color-primary);
+  transform: scale(1.1);
+}
+.spotify-col-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.spotify-title {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+}
+.spotify-speaker {
+  color: var(--color-text-gray);
+  font-size: 0.85rem;
+}
+.spotify-col-share {
+  margin-left: 15px;
+}
+.spotify-btn-share {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spotify-btn-share:hover {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  background: rgba(204, 164, 59, 0.1);
+}
+@media (max-width: 600px) {
+  .spotify-row {
+    padding: 10px;
+  }
+  .spotify-btn-play {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  .spotify-col-play {
+    margin-right: 12px;
+  }
+  .spotify-btn-share span {
+    display: none;
+  }
+  .spotify-btn-share {
+    padding: 8px;
+    border-radius: 50%;
+  }
+}
