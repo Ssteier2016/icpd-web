@@ -2835,7 +2835,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (formPredicas) {
     formPredicas.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (!isFirebaseConfigured()) return;
       
       showLoading();
       try {
