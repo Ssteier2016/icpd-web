@@ -2836,7 +2836,6 @@ document.addEventListener('DOMContentLoaded', () => {
     formPredicas.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      showLoading();
       try {
         const title = document.getElementById('form-predicas-title').value.trim();
         const speaker = document.getElementById('form-predicas-speaker').value.trim();
@@ -2845,7 +2844,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const audioFile = document.getElementById('form-predicas-audio-file').files[0];
 
         if (audioFile) {
-          audioUrl = await uploadFile(audioFile, 'audios');
+          audioUrl = await fileToBase64(audioFile);
         }
 
         const nuevaPredica = { title, speaker, date, audioUrl };
@@ -2853,9 +2852,14 @@ document.addEventListener('DOMContentLoaded', () => {
         await db.ref('icpd_predicas').set(PREDICAS);
 
         formPredicas.reset();
-        showSuccess();
+        
+        // Mostrar mensaje de éxito
+        const successMsg = document.createElement('div');
+        successMsg.style = "position:fixed; bottom:20px; right:20px; background:#4ade80; color:#000; padding:15px 25px; border-radius:8px; font-weight:bold; box-shadow:0 10px 25px rgba(0,0,0,0.5); z-index:9999;";
+        successMsg.innerHTML = '<i class="fa-solid fa-circle-check"></i> ¡Prédica guardada correctamente!';
+        document.body.appendChild(successMsg);
+        setTimeout(() => { successMsg.remove(); }, 3000);
       } catch (error) {
-        hideLoading();
         alert("Error al subir prédica: " + error.message);
       }
     });
