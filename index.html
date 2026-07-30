@@ -352,6 +352,21 @@
     <div class="lightbox-caption" id="lightbox-caption"></div>
   </div>
 
+  <!-- Modal: Programar fechas de una Frase -->
+  <div class="modal" id="frase-schedule-modal" style="z-index: 1300;">
+    <div class="modal-content" style="max-width: 450px; padding: 25px; color: var(--color-text-white);">
+      <button class="modal-close" id="frase-schedule-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      <h3 style="color: var(--color-gold); margin-bottom: 10px;"><i class="fa-solid fa-calendar-days"></i> Programar Frase</h3>
+      <p style="font-size:0.85rem; color:var(--color-text-muted); margin-bottom:15px;">Elige las fechas del almanaque en las que esta imagen se mostrará todo el día. Si la lista queda vacía, la frase vuelve a la rotación normal.</p>
+      <div style="display:flex; gap:8px;">
+        <input type="date" id="frase-schedule-date-picker" style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff;">
+        <button type="button" id="btn-add-frase-schedule-date" class="btn btn-sm" style="background:var(--color-gold); color:#000; white-space:nowrap;"><i class="fa-solid fa-plus"></i> Agregar</button>
+      </div>
+      <div id="frase-schedule-dates-list" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; min-height: 30px;"></div>
+      <button type="button" id="btn-save-frase-schedule" class="btn btn-primary" style="width:100%; margin-top:20px;"><i class="fa-solid fa-floppy-disk"></i> Guardar Programación</button>
+    </div>
+  </div>
+
   <!-- PWA Install Modal -->
   <div class="modal" id="pwa-install-modal">
     <div class="modal-content" style="max-width: 450px; text-align: center; padding: 30px;">
@@ -633,10 +648,19 @@
             <div class="admin-field"><input type="text" id="form-frase-url" placeholder="https://..."></div>
             <div class="admin-field" style="margin-top: 15px;">
               <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color: var(--color-gold);">
-                <input type="checkbox" id="form-frase-priority" style="width: 20px; height: 20px; cursor:pointer;"> 
+                <input type="checkbox" id="form-frase-priority" style="width: 20px; height: 20px; cursor:pointer;">
                 <strong>🌟 Establecer como Prioridad (Mostrar inmediatamente)</strong>
               </label>
               <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:5px;">Si marcas esto, la frase reemplazará a la actual al instante y el contador de 4 horas se reiniciará.</p>
+            </div>
+            <div class="admin-field" style="margin-top: 15px;">
+              <label>📅 Programar para día(s) específicos del almanaque (Opcional):</label>
+              <p style="font-size:0.8rem; color:var(--color-text-muted); margin: 5px 0 8px;">Elige una o más fechas puntuales (ej: los jueves de oración cada 15 días). Ese día la imagen se mostrará todo el día en lugar de rotar automáticamente. Si no eliges ninguna fecha, la frase entra a la rotación normal.</p>
+              <div style="display:flex; gap:8px;">
+                <input type="date" id="form-frase-date-picker" style="flex:1; padding:8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:var(--color-bg-card-alt); color:#fff;">
+                <button type="button" id="btn-add-frase-date" class="btn btn-sm" style="background:var(--color-gold); color:#000; white-space:nowrap;"><i class="fa-solid fa-plus"></i> Agregar</button>
+              </div>
+              <div id="frase-dates-list" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;"><i class="fa-solid fa-quote-left"></i> Subir Frase</button>
           </form>
