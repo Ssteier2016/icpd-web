@@ -330,6 +330,13 @@ function formatDateEs(iso) {
   return `${d}/${m}/${y}`;
 }
 
+function formatDateEsConDia(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const fecha = new Date(y, m - 1, d);
+  return `${dias[fecha.getDay()]} ${formatDateEs(iso)}`;
+}
+
 function renderFraseRotativa() {
   const container = document.getElementById('hero-frases-container');
   if (!container) return;
@@ -1310,7 +1317,7 @@ function initModals() {
     pendingFraseDates.slice().sort().forEach(dateIso => {
       const chip = document.createElement('span');
       chip.style.cssText = 'display:inline-flex; align-items:center; gap:6px; background:rgba(204,163,82,0.15); border:1px solid var(--color-gold); color:var(--color-gold); padding:4px 8px; border-radius:20px; font-size:0.8rem;';
-      chip.innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${formatDateEs(dateIso)} <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:4px;" title="Quitar"></i>`;
+      chip.innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${formatDateEsConDia(dateIso)} <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:4px;" title="Quitar"></i>`;
       chip.querySelector('.fa-xmark').addEventListener('click', () => {
         pendingFraseDates = pendingFraseDates.filter(d => d !== dateIso);
         renderPendingFraseDatesChips();
@@ -1339,6 +1346,10 @@ function initModals() {
     const urlInput = document.getElementById('form-frase-url').value;
     const fileInput = document.getElementById('form-frase-file').files[0];
     const isPriority = document.getElementById('form-frase-priority').checked;
+
+    // Por si el usuario eligió una fecha pero olvidó tocar "Agregar"
+    const pickerVal = document.getElementById('form-frase-date-picker').value;
+    if (pickerVal && !pendingFraseDates.includes(pickerVal)) pendingFraseDates.push(pickerVal);
     const scheduledDates = [...pendingFraseDates];
 
     let finalUrl = urlInput;
@@ -1399,7 +1410,7 @@ function initModals() {
     if (adminFraseTimerInterval) clearInterval(adminFraseTimerInterval);
 
     if (FRASES.length === 0) {
-      grid.innerHTML = '<p style="color:var(--color-text-muted); grid-column: 1/-1;">No hay frases subidas.</p>';
+      grid.innerHTML = '<p style="color:var(--color-text-muted);">No hay frases subidas.</p>';
       return;
     }
 
@@ -1411,46 +1422,49 @@ function initModals() {
 
     FRASES.forEach((frase, idx) => {
       const tieneProgramacion = Array.isArray(frase.scheduledDates) && frase.scheduledDates.length > 0;
-      const item = document.createElement('div');
-      item.style.cssText = 'position: relative; border-radius: 6px; overflow: hidden; aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.1);';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px;';
 
-      let badgeHtml;
-      let timerHtml;
+      let statusHtml;
       let actionButtons;
 
       if (tieneProgramacion) {
         const hoy = getTodayISO();
         const esHoy = frase.scheduledDates.includes(hoy);
-        const fechasTexto = frase.scheduledDates.slice().sort().map(formatDateEs).join(', ');
-        badgeHtml = `<div style="position:absolute; top:2px; left:2px; background:${esHoy ? 'var(--color-gold)' : '#3b82f6'}; color:${esHoy ? '#000' : '#fff'}; font-size:0.6rem; padding:2px 4px; border-radius:3px; font-weight:bold; z-index:2;"><i class="fa-solid fa-calendar-day"></i> ${esHoy ? 'Hoy' : 'Programada'}</div>`;
-        timerHtml = `<div style="position:absolute; bottom:0; left:0; background:rgba(0,0,0,0.85); color:var(--color-gold); font-size:0.6rem; padding:4px 2px; font-weight:bold; width:100%; text-align:center; z-index:2; border-top:1px solid rgba(204,163,82,0.3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${fechasTexto}"><i class="fa-solid fa-calendar-days"></i> ${fechasTexto}</div>`;
+        const fechasTexto = frase.scheduledDates.slice().sort().map(formatDateEsConDia).join(', ');
+        statusHtml = `
+          <div style="font-size:0.7rem; font-weight:bold; color:${esHoy ? 'var(--color-gold)' : '#3b82f6'}; margin-bottom:4px;"><i class="fa-solid fa-calendar-day"></i> ${esHoy ? 'Se muestra HOY' : 'Programada'}</div>
+          <div style="font-size:0.8rem; color:#fff;"><i class="fa-solid fa-calendar-days"></i> ${fechasTexto}</div>
+        `;
         actionButtons = `
-          <button class="btn btn-sm" style="background: #3b82f6; color: #fff; padding: 5px 10px; margin-bottom: 8px; font-size: 0.75rem; min-width:30px;" title="Editar fechas" onclick="editarFechasFrase(${idx})"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn btn-sm" style="background: #ef4444; color: #fff; padding: 5px 10px; font-size: 0.75rem; min-width:30px;" title="Eliminar" onclick="eliminarFrase(${idx})"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn-sm" style="background: #3b82f6; color: #fff; padding: 6px 10px; font-size: 0.75rem;" title="Editar fechas" onclick="editarFechasFrase(${idx})"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-sm" style="background: #ef4444; color: #fff; padding: 6px 10px; font-size: 0.75rem;" title="Eliminar" onclick="eliminarFrase(${idx})"><i class="fa-solid fa-trash"></i></button>
         `;
       } else {
         const rotIndex = frasesRotacion.indexOf(frase);
         const isActual = (rotIndex === estado.currentIndex);
-        badgeHtml = isActual
-          ? '<div style="position:absolute; top:2px; left:2px; background:var(--color-gold); color:#000; font-size:0.6rem; padding:2px 4px; border-radius:3px; font-weight:bold; z-index:2;">' + (rotIndex+1) + 'º (Actual)</div>'
-          : '<div style="position:absolute; top:2px; left:2px; background:rgba(0,0,0,0.7); color:#fff; font-size:0.6rem; padding:2px 4px; border-radius:3px; font-weight:bold; z-index:2;">' + (rotIndex+1) + 'º</div>';
-        timerHtml = `<div class="admin-frase-timer" data-rotidx="${rotIndex}" style="position:absolute; bottom:0; left:0; background:rgba(0,0,0,0.85); color:var(--color-gold); font-size:0.65rem; padding:4px 0; font-weight:bold; width:100%; text-align:center; z-index:2; border-top:1px solid rgba(204,163,82,0.3);">Calculando...</div>`;
+        statusHtml = `
+          <div style="font-size:0.7rem; font-weight:bold; color:${isActual ? 'var(--color-gold)' : 'var(--color-text-muted)'}; margin-bottom:4px;">${rotIndex+1}º ${isActual ? '(Actual)' : ''}</div>
+          <div class="admin-frase-timer" data-rotidx="${rotIndex}" style="font-size:0.8rem; color:#fff;">Calculando...</div>
+        `;
         actionButtons = `
-          <button class="btn btn-sm" style="background: var(--color-gold); color: #000; padding: 5px 10px; margin-bottom: 8px; font-size: 0.75rem; min-width:30px;" title="Hacer Prioridad" onclick="priorizarFrase(${idx})"><i class="fa-solid fa-star"></i></button>
-          <button class="btn btn-sm" style="background: #3b82f6; color: #fff; padding: 5px 10px; margin-bottom: 8px; font-size: 0.75rem; min-width:30px;" title="Programar día(s) específicos" onclick="editarFechasFrase(${idx})"><i class="fa-solid fa-calendar-plus"></i></button>
-          <button class="btn btn-sm" style="background: #ef4444; color: #fff; padding: 5px 10px; font-size: 0.75rem; min-width:30px;" title="Eliminar" onclick="eliminarFrase(${idx})"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn-sm" style="background: var(--color-gold); color: #000; padding: 6px 10px; font-size: 0.75rem;" title="Hacer Prioridad" onclick="priorizarFrase(${idx})"><i class="fa-solid fa-star"></i></button>
+          <button class="btn btn-sm" style="background: #3b82f6; color: #fff; padding: 6px 10px; font-size: 0.75rem;" title="Programar día(s) específicos" onclick="editarFechasFrase(${idx})"><i class="fa-solid fa-calendar-plus"></i></button>
+          <button class="btn btn-sm" style="background: #ef4444; color: #fff; padding: 6px 10px; font-size: 0.75rem;" title="Eliminar" onclick="eliminarFrase(${idx})"><i class="fa-solid fa-trash"></i></button>
         `;
       }
 
-      item.innerHTML = `
-        <img src="${frase.url}" style="width: 100%; height: 100%; object-fit: cover; z-index:1; position:relative;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s; z-index:3;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+      row.innerHTML = `
+        <img src="${frase.url}" style="width: 64px; height: 64px; object-fit: cover; border-radius:6px; flex-shrink:0; cursor:zoom-in;" title="Toca para ampliar">
+        <div style="flex:1; min-width:0;">
+          ${statusHtml}
+        </div>
+        <div style="display:flex; gap:6px; flex-shrink:0;">
           ${actionButtons}
         </div>
-        ${badgeHtml}
-        ${timerHtml}
       `;
-      grid.appendChild(item);
+      row.querySelector('img').addEventListener('click', () => openLightbox(frase.url, 'Frase'));
+      grid.appendChild(row);
     });
 
     if (frasesRotacion.length > 0) {
@@ -1540,7 +1554,7 @@ function initModals() {
     fraseScheduleDates.slice().sort().forEach(dateIso => {
       const chip = document.createElement('span');
       chip.style.cssText = 'display:inline-flex; align-items:center; gap:6px; background:rgba(204,163,82,0.15); border:1px solid var(--color-gold); color:var(--color-gold); padding:4px 8px; border-radius:20px; font-size:0.8rem;';
-      chip.innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${formatDateEs(dateIso)} <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:4px;" title="Quitar"></i>`;
+      chip.innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${formatDateEsConDia(dateIso)} <i class="fa-solid fa-xmark" style="cursor:pointer; margin-left:4px;" title="Quitar"></i>`;
       chip.querySelector('.fa-xmark').addEventListener('click', () => {
         fraseScheduleDates = fraseScheduleDates.filter(d => d !== dateIso);
         renderFraseScheduleDatesChips();
@@ -1590,6 +1604,9 @@ function initModals() {
         fraseScheduleModal.classList.remove('active');
         return;
       }
+      // Por si el usuario eligió una fecha pero olvidó tocar "Agregar"
+      const pickerVal = document.getElementById('frase-schedule-date-picker').value;
+      if (pickerVal && !fraseScheduleDates.includes(pickerVal)) fraseScheduleDates.push(pickerVal);
       FRASES[fraseScheduleEditingIdx].scheduledDates = [...fraseScheduleDates];
       db.ref('icpd_frases').set(FRASES);
       localStorage.setItem('icpd_frases_estado', JSON.stringify({ currentIndex: 0, lastRotation: Date.now() }));
