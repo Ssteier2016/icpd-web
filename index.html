@@ -457,15 +457,30 @@
             <input type="password" id="form-groq-api-key" placeholder="gsk_...">
           </div>
           <button type="button" class="btn btn-primary" onclick="guardarGroqKey()" style="width:100%; margin-top:10px;"><i class="fa-solid fa-save"></i> Guardar API Key</button>
+
+          <h4 style="color:var(--color-gold); margin: 25px 0 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top:20px;"><i class="fa-solid fa-robot"></i> Configuración de IA (Gemini - Respaldo)</h4>
+          <p style="font-size:0.85rem; color:#ccc; margin-bottom:15px;">Opcional. Si Groq falla (por ejemplo por límite de uso), el asistente va a intentar automáticamente con Gemini. Conseguí una API Key gratis en <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--color-gold);">aistudio.google.com/apikey</a>.</p>
+          <div class="admin-field">
+            <label>API Key de Gemini:</label>
+            <input type="password" id="form-gemini-api-key" placeholder="AIzaSy...">
+          </div>
+          <button type="button" class="btn btn-primary" onclick="guardarGeminiKey()" style="width:100%; margin-top:10px;"><i class="fa-solid fa-save"></i> Guardar API Key</button>
           <script>
             function guardarGroqKey() {
               const k = document.getElementById('form-groq-api-key').value;
               localStorage.setItem('icpd_groq_api_key', k);
               alert('API Key de Groq guardada en tu navegador.');
             }
+            function guardarGeminiKey() {
+              const k = document.getElementById('form-gemini-api-key').value;
+              localStorage.setItem('icpd_gemini_api_key', k);
+              alert('API Key de Gemini guardada en tu navegador.');
+            }
             document.addEventListener('DOMContentLoaded', () => {
               const k = localStorage.getItem('icpd_groq_api_key');
               if (k) document.getElementById('form-groq-api-key').value = k;
+              const gk = localStorage.getItem('icpd_gemini_api_key');
+              if (gk) document.getElementById('form-gemini-api-key').value = gk;
             });
           </script>
         </div>
