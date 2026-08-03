@@ -514,6 +514,10 @@ window.currentFilteredSongs = songs;
         <h3>${song.title}</h3>
         <p>${song.author}</p>
       </div>
+      ${song.pdfUrl ? `
+      <button onclick="openPdfModal('${song.pdfUrl}', '${song.title}')" title="Ver en PDF" style="flex-shrink:0; height:100%; width:50px; border:none; border-left:1px solid rgba(255,255,255,0.1); background:rgba(204,163,82,0.1); color:var(--color-gold); font-size:1.2rem; cursor:pointer;">
+        <i class="fa-solid fa-file-pdf"></i>
+      </button>` : ''}
     `;
     grid.appendChild(card);
   });
@@ -582,6 +586,10 @@ function renderEbVideos() {
         <h3>${vid.title}</h3>
         ${vid.author ? `<p style="font-size: 0.8rem; color: var(--color-text-muted);"><i class="fa-solid fa-user"></i> ${vid.author}</p>` : ''}
       </div>
+      ${vid.pdfUrl ? `
+      <button onclick="openPdfModal('${vid.pdfUrl}', '${vid.title}')" title="Ver clase en PDF" style="flex-shrink:0; height:100%; width:50px; border:none; border-left:1px solid rgba(255,255,255,0.1); background:rgba(204,163,82,0.1); color:var(--color-gold); font-size:1.2rem; cursor:pointer;">
+        <i class="fa-solid fa-file-pdf"></i>
+      </button>` : ''}
     `;
     grid.appendChild(card);
   });
@@ -1169,10 +1177,14 @@ function initModals() {
     const ytUrl = document.getElementById('form-clases-yt-url').value;
     const videoFile = document.getElementById('form-clases-video-file').files[0];
     
+    // PDF Option
+    const pdfUrlText = document.getElementById('form-clases-pdf-url').value;
+    const pdfFile = document.getElementById('form-clases-pdf-file').files[0];
+
     // Cover Option
     const coverUrlText = document.getElementById('form-clases-cover-url').value;
     const coverFile = document.getElementById('form-clases-cover-file').files[0];
-    
+
     const section = document.getElementById('form-clases-section').value;
 
     let embedUrl = '';
@@ -1208,11 +1220,21 @@ function initModals() {
       coverUrl = await fileToBase64(coverFile);
     }
 
+    let pdfUrl = '';
+    if (pdfUrlText) {
+      pdfUrl = pdfUrlText;
+    } else if (pdfFile) {
+      if (pdfFile.size > maxMb * 1024 * 1024) {
+        return alert(`El archivo PDF es muy grande (${(pdfFile.size/1024/1024).toFixed(1)}MB). El máximo es ${maxMb}MB.\nPor favor, sube el PDF a Google Drive o Dropbox y pega el enlace aquí.`);
+      }
+      pdfUrl = await fileToBase64(pdfFile);
+    }
+
     if (section === 'songs') {
-      SONGS.push({ id: Date.now(), title, author, embedUrl, type, cover: coverUrl });
+      SONGS.push({ id: Date.now(), title, author, embedUrl, type, cover: coverUrl, pdfUrl });
       db.ref('icpd_songs').set(SONGS);
     } else {
-      EB_VIDEOS.push({ id: Date.now(), title, author, embedUrl, type, cover: coverUrl });
+      EB_VIDEOS.push({ id: Date.now(), title, author, embedUrl, type, cover: coverUrl, pdfUrl });
       db.ref('icpd_eb_videos').set(EB_VIDEOS);
     }
 
@@ -1783,7 +1805,9 @@ function initModals() {
           document.getElementById('edit-clases-url').value = (clase.embedUrl && clase.embedUrl.startsWith('data:')) ? '' : clase.embedUrl;
           document.getElementById('edit-clases-cover-file').value = '';
           document.getElementById('edit-clases-cover-url').value = (clase.cover && !clase.cover.startsWith('data:')) ? clase.cover : '';
-          
+          document.getElementById('edit-clases-pdf-file').value = '';
+          document.getElementById('edit-clases-pdf-url').value = (clase.pdfUrl && !clase.pdfUrl.startsWith('data:')) ? clase.pdfUrl : '';
+
           editClasesFormContainer.style.display = 'block';
           editItemsContainer.style.display = 'none';
         } else {
@@ -2027,13 +2051,16 @@ function initModals() {
       const idx = parseInt(document.getElementById('edit-clases-idx').value);
       const title = document.getElementById('edit-clases-title').value;
       const author = document.getElementById('edit-clases-author').value;
-      const type = document.getElementById('edit-clases-type').value;
-      
+      let type = document.getElementById('edit-clases-type').value;
+
       const file = document.getElementById('edit-clases-file').files[0];
       const urlText = document.getElementById('edit-clases-url').value;
-      
+
       const coverFile = document.getElementById('edit-clases-cover-file').files[0];
       const coverUrlText = document.getElementById('edit-clases-cover-url').value;
+
+      const pdfFile = document.getElementById('edit-clases-pdf-file').files[0];
+      const pdfUrlText = document.getElementById('edit-clases-pdf-url').value;
 
       const maxMb = 7;
 
@@ -2061,13 +2088,24 @@ function initModals() {
         coverUrl = await fileToBase64(coverFile);
       }
 
+      let pdfUrl = EB_VIDEOS[idx].pdfUrl || '';
+      if (pdfUrlText) {
+        pdfUrl = pdfUrlText;
+      } else if (pdfFile) {
+        if (pdfFile.size > maxMb * 1024 * 1024) {
+          return alert(`El archivo PDF es muy grande (${(pdfFile.size/1024/1024).toFixed(1)}MB). El máximo es ${maxMb}MB.\nPor favor, sube el PDF a Google Drive o Dropbox y pega el enlace.`);
+        }
+        pdfUrl = await fileToBase64(pdfFile);
+      }
+
       EB_VIDEOS[idx] = {
         ...EB_VIDEOS[idx],
         title,
         author,
         embedUrl,
         type,
-        cover: coverUrl
+        cover: coverUrl,
+        pdfUrl
       };
 
       db.ref('icpd_eb_videos').set(EB_VIDEOS);

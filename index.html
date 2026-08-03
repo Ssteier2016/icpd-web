@@ -572,6 +572,15 @@
             </div>
 
             <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+              <h4 style="color:var(--color-gold); margin-bottom: 10px;">PDF de la Clase (Opcional)</h4>
+              <label>Importar archivo PDF:</label>
+              <input type="file" id="form-clases-pdf-file" accept="application/pdf" class="admin-file-input">
+              <div class="admin-or">— o URL del PDF —</div>
+              <input type="text" id="form-clases-pdf-url" placeholder="https://...pdf">
+              <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:5px;">Si lo agregas, el usuario va a poder ver la clase también en formato PDF.</p>
+            </div>
+
+            <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
               <h4 style="color:var(--color-gold); margin-bottom: 10px;">Carátula (Para Audios)</h4>
               <label>Importar imagen de portada:</label>
               <input type="file" id="form-clases-cover-file" accept="image/*" class="admin-file-input">
@@ -821,6 +830,13 @@
                 <input type="file" id="edit-clases-file" accept="audio/*,video/*" class="admin-file-input">
                 <div class="admin-or">— o URL (Audio o YouTube) —</div>
                 <input type="text" id="edit-clases-url" placeholder="https://...">
+              </div>
+              <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
+                <h4 style="color:var(--color-gold); margin-bottom: 10px;">PDF de la Clase (Opcional)</h4>
+                <label>Importar archivo PDF:</label>
+                <input type="file" id="edit-clases-pdf-file" accept="application/pdf" class="admin-file-input">
+                <div class="admin-or">— o URL del PDF —</div>
+                <input type="text" id="edit-clases-pdf-url" placeholder="https://...pdf">
               </div>
               <div class="admin-field" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px;">
                 <h4 style="color:var(--color-gold); margin-bottom: 10px;">Reemplazar Carátula (Para Audios)</h4>
