@@ -2955,6 +2955,7 @@ window.setupGroqPanel = function(idx, type) {
       } catch (groqError) {
         const geminiKey = getGeminiApiKey();
         if (!geminiKey) {
+          groqError.message += ' (No se probó el respaldo con Gemini porque no hay una API Key de Gemini guardada en Ajustes. Pegala ahí y tocá "Guardar API Key" para habilitarlo.)';
           throw groqError;
         }
         status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Groq no pudo procesar el audio, probando con Gemini como respaldo...';
