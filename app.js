@@ -2681,6 +2681,91 @@ function formatGroqError(rawText) {
   return err.message || rawText;
 }
 
+// --- Gemini AI Integration (respaldo cuando Groq falla) ---
+const getGeminiApiKey = () => {
+  return localStorage.getItem('icpd_gemini_api_key') || '';
+};
+
+function formatGeminiError(rawText) {
+  try {
+    const err = (JSON.parse(rawText) || {}).error;
+    if (err && err.message) return err.message;
+  } catch (e) {}
+  return rawText;
+}
+
+function blobToBase64Raw(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve((reader.result || '').split(',')[1] || '');
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Transcribe y genera el cuestionario de estudio en una sola llamada a Gemini,
+// devolviendo la misma forma { subsHtml, preguntas } que produce el pipeline de Groq.
+async function transcribeAndAnalyzeWithGemini(audioBlob, apiKey) {
+  const base64Audio = await blobToBase64Raw(audioBlob);
+  const mimeType = (audioBlob.type && audioBlob.type.startsWith('audio')) || (audioBlob.type && audioBlob.type.startsWith('video'))
+    ? audioBlob.type
+    : 'audio/mpeg';
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        parts: [
+          { text: 'Eres un asistente de estudios bíblicos. Escucha este audio, transcribilo completo en español y genera de 3 a 5 preguntas de comprensión importantes sobre su contenido, cada una con su respuesta y un timestamp_hint aproximado en segundos de dónde se responde (0 si no estás seguro). Devuelve únicamente el JSON solicitado.' },
+          { inline_data: { mime_type: mimeType, data: base64Audio } }
+        ]
+      }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            transcript: { type: 'STRING' },
+            preguntas: {
+              type: 'ARRAY',
+              items: {
+                type: 'OBJECT',
+                properties: {
+                  pregunta: { type: 'STRING' },
+                  respuesta: { type: 'STRING' },
+                  timestamp_hint: { type: 'NUMBER' }
+                },
+                required: ['pregunta', 'respuesta']
+              }
+            }
+          },
+          required: ['transcript', 'preguntas']
+        }
+      }
+    })
+  });
+
+  if (!res.ok) {
+    throw new Error(formatGeminiError(await res.text()));
+  }
+
+  const data = await res.json();
+  const partText = data.candidates && data.candidates[0] && data.candidates[0].content &&
+    data.candidates[0].content.parts && data.candidates[0].content.parts[0] &&
+    data.candidates[0].content.parts[0].text;
+  if (!partText) throw new Error('Gemini no devolvió una respuesta utilizable.');
+
+  const parsed = JSON.parse(partText);
+  const transcriptText = parsed.transcript || '';
+  if (!transcriptText.trim()) throw new Error('La transcripción de Gemini devolvió texto vacío.');
+
+  return {
+    subsHtml: `<p>${transcriptText}</p>`,
+    preguntas: Array.isArray(parsed.preguntas) ? parsed.preguntas : []
+  };
+}
+
 window.switchAITab = function(tab) {
   const tabs = document.querySelectorAll('.ai-tab-btn');
   tabs.forEach(t => { t.classList.remove('active'); t.style.color = '#fff'; t.style.borderBottom = 'none'; });
@@ -2796,93 +2881,114 @@ window.setupGroqPanel = function(idx, type) {
       };
       const fileExt = mimeToExt[audioBlob.type] || 'mp3';
 
-      const formData = new FormData();
-      formData.append('file', audioBlob, `audio.${fileExt}`);
-      formData.append('model', 'whisper-large-v3');
-      formData.append('response_format', 'verbose_json');
-      
-      const whisperRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-         method: 'POST',
-         headers: {
-            'Authorization': `Bearer ${getGroqApiKey()}`
-         },
-         body: formData
-      });
-      
-      if (!whisperRes.ok) {
-         throw new Error('Error al transcribir: ' + formatGroqError(await whisperRes.text()));
-      }
-      
-      const whisperData = await whisperRes.json();
-      const transcriptText = whisperData.text || '';
-      
-      if (!transcriptText || transcriptText.trim() === '') {
-         throw new Error('La transcripción devolvió texto vacío.');
-      }
-      
-      // render subtitles
-      let subsHtml = '';
-      if (whisperData.segments) {
-         whisperData.segments.forEach(seg => {
-            const m = Math.floor(seg.start / 60);
-            const s = Math.floor(seg.start % 60);
-            const timeStr = `${m}:${s < 10 ? '0'+s : s}`;
-            subsHtml += `<p><a href="#" onclick="seekToTime(${seg.start}); return false;" style="color:var(--color-gold); text-decoration:none; margin-right:8px; font-weight:bold;">[${timeStr}]</a> ${seg.text}</p>`;
-         });
-      } else {
-         subsHtml = `<p>${transcriptText}</p>`;
-      }
-      subsContent.innerHTML = subsHtml;
-      
-      // 2. Chat API for questionnaire
-      status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generando el cuestionario de estudio con IA...';
+      // Transcribe + genera el cuestionario con Groq (Whisper + LLaMA). Devuelve
+      // { subsHtml, preguntas } para que el resto del flujo sea igual sin importar
+      // qué proveedor de IA haya respondido.
+      async function runGroqPipeline() {
+        const formData = new FormData();
+        formData.append('file', audioBlob, `audio.${fileExt}`);
+        formData.append('model', 'whisper-large-v3');
+        formData.append('response_format', 'verbose_json');
 
-      const chatRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-         method: 'POST',
-         headers: {
-            'Authorization': `Bearer ${getGroqApiKey()}`,
-            'Content-Type': 'application/json'
-         },
-         body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-               { role: 'system', content: 'Eres un asistente de estudios bíblicos. Dada una transcripción, genera 3 a 5 preguntas de comprensión importantes. Devuelve SOLO un JSON con este formato exacto: {"preguntas": [{"pregunta": "texto", "respuesta": "texto", "timestamp_hint": 120}]}. Usa timestamp_hint en segundos numéricos basados en el contexto donde se responde la pregunta, o 0 si no sabes.' },
-               { role: 'user', content: `Transcripción: ${transcriptText.substring(0, 50000)}` }
-            ],
-            response_format: { type: 'json_object' }
-         })
-      });
-      
-      if (!chatRes.ok) {
-         throw new Error('Error al generar cuestionario: ' + formatGroqError(await chatRes.text()));
-      }
-      
-      const chatData = await chatRes.json();
-      const qnaResult = JSON.parse(chatData.choices[0].message.content);
-      
-      let qnaHtml = '<ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:15px;">';
-      if (qnaResult && qnaResult.preguntas) {
-        qnaResult.preguntas.forEach((q, i) => {
-           const m = Math.floor(q.timestamp_hint / 60);
-           const s = Math.floor(q.timestamp_hint % 60);
-           const timeStr = `${m}:${s < 10 ? '0'+s : s}`;
-           qnaHtml += `
-              <li style="background:rgba(255,255,255,0.05); padding:15px; border-radius:6px; border-left:3px solid var(--color-gold);">
-                 <strong style="color:var(--color-gold); display:block; margin-bottom:8px; font-size:1rem;">${i+1}. ${q.pregunta}</strong>
-                 <p style="margin:0 0 10px 0; color:#ddd; font-style:italic;">Respuesta: ${q.respuesta}</p>
-                 <button onclick="seekToTime(${q.timestamp_hint})" class="btn btn-sm" style="background:transparent; border:1px solid var(--color-gold); color:var(--color-gold); padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-play"></i> Saltar al video (${timeStr})</button>
-              </li>
-           `;
+        const whisperRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+           method: 'POST',
+           headers: {
+              'Authorization': `Bearer ${getGroqApiKey()}`
+           },
+           body: formData
         });
+
+        if (!whisperRes.ok) {
+           throw new Error('Error al transcribir: ' + formatGroqError(await whisperRes.text()));
+        }
+
+        const whisperData = await whisperRes.json();
+        const transcriptText = whisperData.text || '';
+
+        if (!transcriptText || transcriptText.trim() === '') {
+           throw new Error('La transcripción devolvió texto vacío.');
+        }
+
+        let subsHtml = '';
+        if (whisperData.segments) {
+           whisperData.segments.forEach(seg => {
+              const m = Math.floor(seg.start / 60);
+              const s = Math.floor(seg.start % 60);
+              const timeStr = `${m}:${s < 10 ? '0'+s : s}`;
+              subsHtml += `<p><a href="#" onclick="seekToTime(${seg.start}); return false;" style="color:var(--color-gold); text-decoration:none; margin-right:8px; font-weight:bold;">[${timeStr}]</a> ${seg.text}</p>`;
+           });
+        } else {
+           subsHtml = `<p>${transcriptText}</p>`;
+        }
+
+        status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generando el cuestionario de estudio con IA...';
+
+        const chatRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+           method: 'POST',
+           headers: {
+              'Authorization': `Bearer ${getGroqApiKey()}`,
+              'Content-Type': 'application/json'
+           },
+           body: JSON.stringify({
+              model: 'llama-3.3-70b-versatile',
+              messages: [
+                 { role: 'system', content: 'Eres un asistente de estudios bíblicos. Dada una transcripción, genera 3 a 5 preguntas de comprensión importantes. Devuelve SOLO un JSON con este formato exacto: {"preguntas": [{"pregunta": "texto", "respuesta": "texto", "timestamp_hint": 120}]}. Usa timestamp_hint en segundos numéricos basados en el contexto donde se responde la pregunta, o 0 si no sabes.' },
+                 { role: 'user', content: `Transcripción: ${transcriptText.substring(0, 50000)}` }
+              ],
+              response_format: { type: 'json_object' }
+           })
+        });
+
+        if (!chatRes.ok) {
+           throw new Error('Error al generar cuestionario: ' + formatGroqError(await chatRes.text()));
+        }
+
+        const chatData = await chatRes.json();
+        const qnaResult = JSON.parse(chatData.choices[0].message.content);
+
+        return { subsHtml, preguntas: (qnaResult && qnaResult.preguntas) || [] };
       }
+
+      let result;
+      try {
+        result = await runGroqPipeline();
+      } catch (groqError) {
+        const geminiKey = getGeminiApiKey();
+        if (!geminiKey) {
+          throw groqError;
+        }
+        status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Groq no pudo procesar el audio, probando con Gemini como respaldo...';
+        try {
+          result = await transcribeAndAnalyzeWithGemini(audioBlob, geminiKey);
+        } catch (geminiError) {
+          throw new Error(`Groq falló (${groqError.message}) y el respaldo con Gemini también falló (${geminiError.message}).`);
+        }
+      }
+
+      subsContent.innerHTML = result.subsHtml;
+
+      let qnaHtml = '<ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:15px;">';
+      result.preguntas.forEach((q, i) => {
+         const ts = q.timestamp_hint || 0;
+         const m = Math.floor(ts / 60);
+         const s = Math.floor(ts % 60);
+         const timeStr = `${m}:${s < 10 ? '0'+s : s}`;
+         qnaHtml += `
+            <li style="background:rgba(255,255,255,0.05); padding:15px; border-radius:6px; border-left:3px solid var(--color-gold);">
+               <strong style="color:var(--color-gold); display:block; margin-bottom:8px; font-size:1rem;">${i+1}. ${q.pregunta}</strong>
+               <p style="margin:0 0 10px 0; color:#ddd; font-style:italic;">Respuesta: ${q.respuesta}</p>
+               <button onclick="seekToTime(${ts})" class="btn btn-sm" style="background:transparent; border:1px solid var(--color-gold); color:var(--color-gold); padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-play"></i> Saltar al video (${timeStr})</button>
+            </li>
+         `;
+      });
       qnaHtml += '</ul>';
-      
+
       qnaContent.innerHTML = qnaHtml;
-      
+
       status.style.display = 'none';
       tabs.style.display = 'flex';
       switchAITab('qna');
-      
+
     } catch (e) {
       status.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Ocurrió un error: ${e.message}`;
     }
