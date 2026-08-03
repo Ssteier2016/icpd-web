@@ -2724,11 +2724,17 @@ window.setupGroqPanel = function(idx, type) {
        alert("Formato de audio no compatible para extraer.");
        return;
     }
-    
+
+    // Convertir enlaces de Google Drive/Dropbox a descarga directa (si no, se descarga
+    // la página HTML del visor en lugar del archivo real).
+    if (audioUrl.startsWith('http') && typeof convertDriveLinkToDirect === 'function') {
+      audioUrl = convertDriveLinkToDirect(audioUrl);
+    }
+
     btn.style.display = 'none';
     status.style.display = 'block';
     status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Obteniendo el audio y transcribiendo con Whisper... esto puede tardar unos minutos según el tamaño.';
-    
+
     try {
       // 1. Fetch audio and convert to blob
       let audioBlob;
@@ -2738,15 +2744,30 @@ window.setupGroqPanel = function(idx, type) {
       } catch (e) {
         throw new Error('No se pudo descargar el archivo de audio. Verifica que no haya restricciones de seguridad (CORS). Sube los audios directamente (Archivo) para mayor seguridad.');
       }
-      
+
+      // Si el enlace no devolvió un archivo de audio/video real (ej: la página HTML
+      // de aviso de virus de Google Drive en archivos grandes), avisar claro en vez
+      // de mandarlo a Groq y recibir un error críptico.
+      if (audioBlob.type && !audioBlob.type.startsWith('audio') && !audioBlob.type.startsWith('video') && !audioBlob.type.startsWith('application/octet-stream')) {
+         throw new Error(`El enlace no devolvió un archivo de audio/video válido (se recibió "${audioBlob.type || 'desconocido'}"). Si es de Google Drive, confirma que el archivo pese menos de 100MB y tenga el permiso "Cualquier persona con el enlace", o sube el archivo directamente (Archivo) en el administrador.`);
+      }
+
       // limit check (Groq Whisper limit is 25MB)
       if (audioBlob.size > 24 * 1024 * 1024) {
          status.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> El audio es demasiado grande para la IA (>25MB). Sube una versión de menor calidad (mp3 a 64kbps).';
          return;
       }
-      
+
+      const mimeToExt = {
+        'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a',
+        'audio/m4a': 'm4a', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/ogg': 'ogg',
+        'audio/webm': 'webm', 'audio/flac': 'flac', 'audio/aac': 'aac',
+        'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov'
+      };
+      const fileExt = mimeToExt[audioBlob.type] || 'mp3';
+
       const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.mp3');
+      formData.append('file', audioBlob, `audio.${fileExt}`);
       formData.append('model', 'whisper-large-v3');
       formData.append('response_format', 'verbose_json');
       
