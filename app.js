@@ -2742,7 +2742,11 @@ window.setupGroqPanel = function(idx, type) {
         const res = await fetch(audioUrl);
         audioBlob = await res.blob();
       } catch (e) {
-        throw new Error('No se pudo descargar el archivo de audio. Verifica que no haya restricciones de seguridad (CORS). Sube los audios directamente (Archivo) para mayor seguridad.');
+        let extra = ' Sube el archivo directamente (opción "Archivo") en el administrador en lugar de pegar un enlace externo.';
+        if (audioUrl.includes('drive.google.com')) {
+          extra = ' Esto es normal en enlaces de Google Drive: el navegador puede reproducirlos pero no descargarlos para analizarlos por una restricción de seguridad (CORS) del propio Drive. Para usar el Asistente de IA con esta clase, sube el archivo directamente (opción "Archivo") en el administrador.';
+        }
+        throw new Error('No se pudo descargar el archivo para analizarlo (restricción de seguridad CORS del sitio donde está alojado).' + extra);
       }
 
       // Si el enlace no devolvió un archivo de audio/video real (ej: la página HTML
@@ -2805,8 +2809,8 @@ window.setupGroqPanel = function(idx, type) {
       subsContent.innerHTML = subsHtml;
       
       // 2. Chat API for questionnaire
-      status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generando el cuestionario de estudio con LLaMA 3...';
-      
+      status.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generando el cuestionario de estudio con IA...';
+
       const chatRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
          method: 'POST',
          headers: {
@@ -2814,7 +2818,7 @@ window.setupGroqPanel = function(idx, type) {
             'Content-Type': 'application/json'
          },
          body: JSON.stringify({
-            model: 'llama3-8b-8192',
+            model: 'llama-3.3-70b-versatile',
             messages: [
                { role: 'system', content: 'Eres un asistente de estudios bíblicos. Dada una transcripción, genera 3 a 5 preguntas de comprensión importantes. Devuelve SOLO un JSON con este formato exacto: {"preguntas": [{"pregunta": "texto", "respuesta": "texto", "timestamp_hint": 120}]}. Usa timestamp_hint en segundos numéricos basados en el contexto donde se responde la pregunta, o 0 si no sabes.' },
                { role: 'user', content: `Transcripción: ${transcriptText.substring(0, 50000)}` }
