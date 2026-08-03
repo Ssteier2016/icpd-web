@@ -2655,6 +2655,32 @@ const getGroqApiKey = () => {
   return localStorage.getItem('icpd_groq_api_key') || '';
 };
 
+// Convierte una respuesta de error cruda de la API de Groq en un mensaje claro en español.
+function formatGroqError(rawText) {
+  let err = null;
+  try {
+    err = (JSON.parse(rawText) || {}).error;
+  } catch (e) {
+    return rawText;
+  }
+  if (!err) return rawText;
+
+  if (err.code === 'rate_limit_exceeded') {
+    const m = /try again in\s+(?:(\d+)m)?([\d.]+)s/i.exec(err.message || '');
+    let waitText = '';
+    if (m) {
+      const mins = m[1] ? parseInt(m[1], 10) : 0;
+      const secs = Math.ceil(parseFloat(m[2]));
+      waitText = mins > 0 ? `${mins} min ${secs} seg` : `${secs} segundos`;
+    }
+    return `Alcanzaste el límite de uso gratuito de Groq por esta hora.${waitText ? ' Podés reintentar en aproximadamente ' + waitText + '.' : ' Podés reintentar en unos minutos.'} El límite se reinicia automáticamente cada hora; si necesitas analizar audios más seguido, se puede ampliar el plan en console.groq.com/settings/billing.`;
+  }
+  if (err.code === 'model_decommissioned') {
+    return 'El modelo de IA usado fue discontinuado por Groq. Avisa para actualizarlo a uno vigente.';
+  }
+  return err.message || rawText;
+}
+
 window.switchAITab = function(tab) {
   const tabs = document.querySelectorAll('.ai-tab-btn');
   tabs.forEach(t => { t.classList.remove('active'); t.style.color = '#fff'; t.style.borderBottom = 'none'; });
@@ -2784,7 +2810,7 @@ window.setupGroqPanel = function(idx, type) {
       });
       
       if (!whisperRes.ok) {
-         throw new Error('Error al transcribir (Groq): ' + (await whisperRes.text()));
+         throw new Error('Error al transcribir: ' + formatGroqError(await whisperRes.text()));
       }
       
       const whisperData = await whisperRes.json();
@@ -2828,7 +2854,7 @@ window.setupGroqPanel = function(idx, type) {
       });
       
       if (!chatRes.ok) {
-         throw new Error('Error al generar cuestionario: ' + (await chatRes.text()));
+         throw new Error('Error al generar cuestionario: ' + formatGroqError(await chatRes.text()));
       }
       
       const chatData = await chatRes.json();
