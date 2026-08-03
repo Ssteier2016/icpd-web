@@ -2711,8 +2711,8 @@ window.setupGroqPanel = function(idx, type) {
     let audioUrl = '';
     if (type === 'sermon' && SERMONS[idx]) {
       audioUrl = SERMONS[idx].audio;
-    } else if (type === 'eb' && CLASES_EB[idx]) {
-      audioUrl = CLASES_EB[idx].embedUrl; // Para clases que sólo subieron audio
+    } else if (type === 'eb' && EB_VIDEOS[idx]) {
+      audioUrl = EB_VIDEOS[idx].embedUrl; // Para clases que sólo subieron audio
     }
     
     if (!audioUrl || audioUrl === '#' || audioUrl.includes('SoundHelix')) {
