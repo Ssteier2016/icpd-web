@@ -2687,11 +2687,25 @@ const getGeminiApiKey = () => {
 };
 
 function formatGeminiError(rawText) {
+  let err = null;
   try {
-    const err = (JSON.parse(rawText) || {}).error;
-    if (err && err.message) return err.message;
-  } catch (e) {}
-  return rawText;
+    err = (JSON.parse(rawText) || {}).error;
+  } catch (e) {
+    return rawText;
+  }
+  if (!err) return rawText;
+
+  const msg = err.message || '';
+  if (err.status === 'RESOURCE_EXHAUSTED' || msg.toLowerCase().includes('quota exceeded')) {
+    if (/per minute/i.test(msg)) {
+      return 'Alcanzaste el límite gratuito de Gemini por minuto. Se reinicia solo; esperá alrededor de 1 minuto y volvé a tocar "Analizar Audio".';
+    }
+    if (/per day/i.test(msg)) {
+      return 'Alcanzaste el límite gratuito diario de Gemini. Se reinicia recién mañana; mientras tanto podés esperar a que se libere el límite de Groq (se reinicia cada hora).';
+    }
+    return 'Alcanzaste un límite de uso gratuito de Gemini. Esperá unos minutos y volvé a intentar.';
+  }
+  return msg || rawText;
 }
 
 function blobToBase64Raw(blob) {
